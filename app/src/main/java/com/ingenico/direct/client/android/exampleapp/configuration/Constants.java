@@ -7,7 +7,7 @@ package com.ingenico.direct.client.android.exampleapp.configuration;
 public class Constants {
 
 	/** Application Identifier, used for identifying the application in network calls **/
-	public static String APPLICATION_IDENTIFIER = "Direct Android Example Application/v1.0.0";
+	public static String APPLICATION_IDENTIFIER = "Direct Android Example Application/v1.0.1";
 
 	/** Intent data keys **/
 	public final static String INTENT_PAYMENT_CONTEXT 			 = "paymentContext";

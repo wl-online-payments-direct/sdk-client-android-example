@@ -33,8 +33,8 @@ To use the Android SDK in your own app, you need to add the `ingenicodirect-sdk`
 *If you do not yet have the SDK .aar file, please refer to https://github.com/Ingenico/direct-sdk-client-android for instruction on how to build.*
 
 1. Open your app in Android Studio.
-2. Copy the .aar SDK file in the app/libs folder.
+2. Copy the .aar SDK file to an app/libs folder.
 3. Go to app/build.gradle and find the SDK dependency in the `dependencies` node.
-4. Make sure that the name of the SDK .aar in the `libs` folder matches the name of the dependency in the `build.gradle` file.
+4. Update the dependency of the Direct SDK so that it is included by file name: `implementation (name: '<file name>', ext: 'aar')`.
 5. Add the `libs` folder as a `flatDir` repository.
 6. Once the dependency is included, you can `Run` the `app` module on an emulator or physical device in order to build and install the app.
