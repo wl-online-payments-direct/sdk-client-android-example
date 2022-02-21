@@ -27,7 +27,7 @@
 				tools:ignore="MergeRootFrame"
 				android:layout_weight="1"
 				android:scrollbars="none"
-				tools:context="com.ingenico.direct.client.android.exampleapp.activities.PaymentProductSelectionActivity" >
+				tools:context="com.onlinepayments.client.android.exampleapp.activities.PaymentProductSelectionActivity" >
 
 				<LinearLayout
 					android:layout_width="fill_parent"

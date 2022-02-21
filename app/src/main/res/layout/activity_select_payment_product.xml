@@ -14,7 +14,7 @@
 	    android:id="@+id/container"
 	    android:layout_width="match_parent"
 	    android:layout_height="0dp"
-	    tools:context="com.ingenico.direct.client.android.exampleapp.activities.PaymentProductSelectionActivity"
+	    tools:context="com.onlinepayments.client.android.exampleapp.activities.PaymentProductSelectionActivity"
 	    tools:ignore="MergeRootFrame" >
 
 

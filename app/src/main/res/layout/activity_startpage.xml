@@ -26,7 +26,7 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="To process a payment using the services provided by the Ingenico ePayments platform, the following information must be provided by a merchant. \n\nAfter providing the information requested below, this example app can process a payment." />
+				android:text="To process a payment using the services provided by the Online Payments platform, the following information must be provided by a merchant. \n\nAfter providing the information requested below, this example app can process a payment." />
 
 			<RelativeLayout
 				android:layout_width="match_parent"
@@ -41,7 +41,7 @@
 					android:layout_height="wrap_content"
 					android:text="Client Session Identifier:" />
 
-				<com.ingenico.direct.client.android.exampleapp.view.ValidationEditText
+				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/client_session_identifier"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
 					android:layout_marginTop="10dp"
 					android:text="Customer Identifier:" />
 
-				<com.ingenico.direct.client.android.exampleapp.view.ValidationEditText
+				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/customer_identifier"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
 					android:layout_marginTop="10dp"
 					android:text="Client API URL:" />
 
-				<com.ingenico.direct.client.android.exampleapp.view.ValidationEditText
+				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/client_api_url"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
 					android:layout_marginTop="10dp"
 					android:text="Assets URL:" />
 
-				<com.ingenico.direct.client.android.exampleapp.view.ValidationEditText
+				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/asset_url"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -112,9 +112,33 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
+				android:text="Merchant Identifier:" />
+
+			<android.widget.EditText
+				android:id="@+id/merchant_identifier"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="text" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:text="Merchant Name:" />
+
+			<android.widget.EditText
+				android:id="@+id/merchant_name"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="text" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
 				android:text="Amount in cents:" />
 
-			<com.ingenico.direct.client.android.exampleapp.view.ValidationEditText
+			<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 				android:id="@+id/amount"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
