@@ -5,7 +5,6 @@ import android.text.method.LinkMovementMethod;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.sdk.client.android.configuration.Constants;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
@@ -27,14 +26,7 @@ public class RenderLabel implements RenderLabelInterface {
 		TextView label = new TextView(rowView.getContext());
 
 		// Get the labeltext
-		Translator translator = Translator.getInstance(rowView.getContext());
-		String labelText = translator.getPaymentProductFieldLabel(selectedPaymentProduct.getId(), field.getId());
-		if (labelText.contains(Constants.LINK_PLACEHOLDER)) {
-			String linkLabel = translator.getPaymentProductFieldLabel(selectedPaymentProduct.getId(), field.getId() + ".link");
-			String link = "<a href=\"" + field.getDisplayHints().getLink() + "\">" + linkLabel + "</a>";
-			labelText = labelText.replace(Constants.LINK_PLACEHOLDER, link);
-			label.setMovementMethod(LinkMovementMethod.getInstance());
-		}
+		String labelText = field.getDisplayHints().getLabel();
 
 		// Create new label
 		label.setTextAppearance(rowView.getContext(), R.style.ListViewTextView);

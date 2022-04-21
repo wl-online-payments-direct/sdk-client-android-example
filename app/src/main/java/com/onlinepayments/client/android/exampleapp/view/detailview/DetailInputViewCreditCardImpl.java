@@ -61,7 +61,7 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
     }
 
     @Override
-    public void renderPaymentProductLogoInCreditCardField(String productId) {
+    public void renderPaymentProductLogoByIdInCreditCardField(String productId) {
 
         // Retrieve the logo from the top most PaymentProduct
         AssetManager logoManager = AssetManager.getInstance(rootView.getContext().getApplicationContext());

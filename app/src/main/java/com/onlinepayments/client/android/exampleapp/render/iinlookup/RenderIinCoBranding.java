@@ -146,9 +146,12 @@ public class RenderIinCoBranding {
             TextView paymentProductNameTextView         = paymentProductLayout.findViewById(R.id.coBrandPaymentProductName);
             ImageView paymentProductNameLogoImageView   = paymentProductLayout.findViewById(R.id.coBrandPaymentProductLogo);
 
-            // Set the translated value
-            Translator translator = Translator.getInstance(coBrandTooltipLayout.getContext());
-            paymentProductNameTextView.setText(translator.getPaymentProductName(basicPaymentItem.getId()));
+            // Set payment item name
+            if(!basicPaymentItem.getDisplayHintsList().isEmpty()) {
+                paymentProductNameTextView.setText(basicPaymentItem.getDisplayHintsList().get(0).getLabel());
+            } else {
+                paymentProductNameTextView.setText("Display hints not found");
+            }
 
             // Get the logo for the product and set it as the background
             BitmapDrawable drawable = (BitmapDrawable)logoManager.getLogo(basicPaymentItem.getId());

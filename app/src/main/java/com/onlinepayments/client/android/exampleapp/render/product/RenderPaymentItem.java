@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
 
@@ -47,15 +46,20 @@ public class RenderPaymentItem implements RenderPaymentItemInterface {
 		TextView paymentProductNameTextView = paymentProductLayout.findViewById(R.id.paymentProductName);
 		ImageView paymentProductNameLogoImageView = paymentProductLayout.findViewById(R.id.paymentProductLogo);
 
-		// Set the translated value
-		Translator translator = Translator.getInstance(parent.getContext());
-		String translatedValue = (product instanceof BasicPaymentProduct) ? translator.getPaymentProductName(product.getId()) : translator.getPaymentProductGroupName(product.getId());
-		paymentProductNameTextView.setText(translatedValue);
-				
-		if (Build.VERSION.SDK_INT < 16) {
-			paymentProductNameLogoImageView.setBackgroundDrawable(product.getDisplayHints().getLogo());
+		// Set payment item name
+		if (product instanceof BasicPaymentProduct) {
+			if(!product.getDisplayHintsList().isEmpty()) {
+				paymentProductNameTextView.setText(product.getDisplayHintsList().get(0).getLabel());
+				if (Build.VERSION.SDK_INT < 16) {
+					paymentProductNameLogoImageView.setBackgroundDrawable(product.getDisplayHintsList().get(0).getLogo());
+				} else {
+					paymentProductNameLogoImageView.setBackground(product.getDisplayHintsList().get(0).getLogo());
+				}
+			} else {
+				paymentProductNameTextView.setText("Display hints not found");
+			}
 		} else {
-			paymentProductNameLogoImageView.setBackground(product.getDisplayHints().getLogo());
+			paymentProductNameTextView.setText(product.getId());
 		}
 		
 		parent.addView(paymentProductLayout);

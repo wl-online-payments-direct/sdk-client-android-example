@@ -22,7 +22,7 @@ public interface DetailInputViewCreditCard extends DetailInputView {
 
     void removeCreditCardValidationMessage(InputValidationPersister inputValidationPersister);
 
-    void renderPaymentProductLogoInCreditCardField(String productId);
+    void renderPaymentProductLogoByIdInCreditCardField(String productId);
 
     void removeDrawableInEditText();
 

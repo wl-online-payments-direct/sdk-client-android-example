@@ -64,7 +64,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
         fieldView.initializeCreditCardField(iinLookupTextWatcher);
 
         if (inputDataPersister.isPaymentProduct()) {
-            fieldView.renderPaymentProductLogoInCreditCardField(inputDataPersister.getPaymentItem().getId());
+            fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem().getId());
         }
 
         if (iinDetailsPersister.getIinDetailsResponse() != null) {
@@ -127,7 +127,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
                 if (coBrand.isAllowedInContext() && inputDataPersister.getPaymentItem().getId().equals(coBrand.getPaymentProductId())) {
 
                     // Show the corresponding logo for the Payement Product
-                    fieldView.renderPaymentProductLogoInCreditCardField(coBrand.getPaymentProductId());
+                    fieldView.renderPaymentProductLogoByIdInCreditCardField(coBrand.getPaymentProductId());
 
                     // Show the user that he can possibly switch to an other brand with the same card number
                     getCoBrandProductsAndRenderNotification(response);
@@ -223,7 +223,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
         PaymentProduct paymentProduct = (PaymentProduct) view.getTag();
 
         // Update the logo in the edit text
-        fieldView.renderPaymentProductLogoInCreditCardField(paymentProduct.getId());
+        fieldView.renderPaymentProductLogoByIdInCreditCardField(paymentProduct.getId());
 
         // Update the request to use the new paymentProduct
         inputDataPersister.setPaymentItem(paymentProduct);

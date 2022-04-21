@@ -104,7 +104,7 @@ public class RenderInputFieldHelper {
 
 			// Render tooltip in row
 			if (view.isEnabled()) {
-				tooltipRenderer.renderTooltip(field.getId(), paymentItem, rowContentView);
+				tooltipRenderer.renderTooltip(field, paymentItem, rowContentView);
 			}
 
 			rowView.addView(rowContentView);

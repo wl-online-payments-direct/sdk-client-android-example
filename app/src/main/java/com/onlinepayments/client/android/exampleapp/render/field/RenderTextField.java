@@ -9,12 +9,10 @@ import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.sdk.client.android.formatter.StringFormatter;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 import java.security.InvalidParameterException;
@@ -41,7 +39,6 @@ public class RenderTextField implements RenderInputFieldInterface {
 			throw new InvalidParameterException("Error rendering textfield, inputDataPersister may not be null");
 		}
 
-		PaymentItem paymentItem = inputDataPersister.getPaymentItem();
 		AccountOnFile accountOnFile = inputDataPersister.getAccountOnFile();
 
 		// Create new EditText and set its style, restrictions, mask and keyboardtype
@@ -57,9 +54,8 @@ public class RenderTextField implements RenderInputFieldInterface {
 			}
 		}
 
-		Translator translator = Translator.getInstance(rowView.getContext());
-		String label = translator.getPaymentProductFieldPlaceholderText(paymentItem.getId(), field.getId());
-		editText.setHint(label);
+		// Set placeholder for field
+		editText.setHint(field.getDisplayHints().getPlaceholderLabel());
 
 		// Set correct inputType type
 		switch (field.getDisplayHints().getPreferredInputType()) {
