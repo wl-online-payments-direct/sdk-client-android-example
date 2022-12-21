@@ -1,8 +1,5 @@
 package com.onlinepayments.client.android.exampleapp.util;
 
-import com.onlinepayments.sdk.client.android.model.CountryCode;
-import com.onlinepayments.sdk.client.android.model.CurrencyCode;
-
 import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
@@ -19,20 +16,25 @@ public final class CurrencyUtil {
 
     }
 
-    public static String formatAmount(long amount, CountryCode countryCode, CurrencyCode currencyCode) {
+    public static String formatAmount(long amount, String countryCode, String currencyCode) {
         // Find the locale from the countryCode
         Locale localeFromCountryCode = null;
 
         for (Locale locale : Locale.getAvailableLocales()) {
 
-            if (countryCode.name().equals(locale.getCountry())) {
+            if (countryCode.equals(locale.getCountry())) {
                 localeFromCountryCode = locale;
                 break;
             }
         }
 
         // Find the currency from the currencyCode
-        Currency currencyFromCurrencyCode = Currency.getInstance(currencyCode.name());
+        Currency currencyFromCurrencyCode = null;
+        try {
+            currencyFromCurrencyCode = Currency.getInstance(currencyCode);
+        } catch (Exception exception) {
+            // invalid currency
+        }
 
         if (localeFromCountryCode != null && currencyFromCurrencyCode != null) {
 

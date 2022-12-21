@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -253,8 +254,14 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     }
 
     private void startGooglePay(PaymentProduct paymentProduct) {
-        GooglePay googlePay = new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
-        googlePay.start(session.isEnvironmentTypeProduction());
+        if (!merchantId.isEmpty() && !merchantName.isEmpty()) {
+            GooglePay googlePay = new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
+            googlePay.start(session.isEnvironmentTypeProduction());
+        } else {
+            Toast
+                .makeText(this, "MerchantId & MerchantName cannot be empty when you want to use GooglePay", Toast.LENGTH_LONG)
+                .show();
+        }
         selectionView.hideLoadingIndicator();
     }
 
