@@ -40,10 +40,8 @@ public class RenderDate implements RenderInputFieldInterface {
 
         DatePicker datePicker = new DatePicker(rowView.getContext());
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            datePicker.setCalendarViewShown(false);
-            datePicker.setSpinnersShown(true);
-        }
+        datePicker.setCalendarViewShown(false);
+        datePicker.setSpinnersShown(true);
 
         // Create a listener here, which we can use to provide to all init calls
         OnDateChangedListener listener = createOnDateChangedListener(inputDataPersister, field.getId());

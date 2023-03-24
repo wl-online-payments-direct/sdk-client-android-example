@@ -188,14 +188,6 @@ public class DetailInputActivity extends ShoppingCartActivity implements OnPayme
         // - Webview page to show an instructions page, or to go to a third party payment page
         //
         // Successful and Unsuccessful results have to be redirected to PaymentResultActivity
-        // PaymentWebViewActivity is used for showing the Webview
-
-
-        // To go to the PaymentWebViewActivity uncomment this:
-        // Intent intent = new Intent(this, PaymentWebViewActivity.class);
-        // intent.putExtra(Constants.INTENT_URL_WEBVIEW,"[enter-url-here]");
-        // startActivity(intent);
-
 
         // When the the payment result has come back, go to the successful/unsuccessful page:
         Intent paymentResultIntent = new Intent(this, PaymentResultActivity.class);

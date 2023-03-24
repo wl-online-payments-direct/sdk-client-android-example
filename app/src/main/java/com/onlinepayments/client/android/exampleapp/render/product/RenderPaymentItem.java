@@ -50,13 +50,9 @@ public class RenderPaymentItem implements RenderPaymentItemInterface {
 		if (product instanceof BasicPaymentProduct) {
 			if(!product.getDisplayHintsList().isEmpty()) {
 				paymentProductNameTextView.setText(product.getDisplayHintsList().get(0).getLabel());
-				if (Build.VERSION.SDK_INT < 16) {
-					paymentProductNameLogoImageView.setBackgroundDrawable(product.getDisplayHintsList().get(0).getLogo());
-				} else {
-					paymentProductNameLogoImageView.setBackground(product.getDisplayHintsList().get(0).getLogo());
-				}
+				paymentProductNameLogoImageView.setBackground(product.getDisplayHintsList().get(0).getLogo());
 			} else {
-				paymentProductNameTextView.setText("Display hints not found");
+				paymentProductNameTextView.setText(parent.getContext().getString(R.string.gc_general_errors_generalError));
 			}
 		} else {
 			paymentProductNameTextView.setText(product.getId());

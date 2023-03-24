@@ -150,17 +150,13 @@ public class RenderIinCoBranding {
             if(!basicPaymentItem.getDisplayHintsList().isEmpty()) {
                 paymentProductNameTextView.setText(basicPaymentItem.getDisplayHintsList().get(0).getLabel());
             } else {
-                paymentProductNameTextView.setText("Display hints not found");
+                paymentProductNameTextView.setText(context.getString(R.string.gc_general_errors_generalError));
             }
 
             // Get the logo for the product and set it as the background
             BitmapDrawable drawable = (BitmapDrawable)logoManager.getLogo(basicPaymentItem.getId());
 
-            if (Build.VERSION.SDK_INT < 16) {
-                paymentProductNameLogoImageView.setBackgroundDrawable(drawable);
-            } else {
-                paymentProductNameLogoImageView.setBackground(drawable);
-            }
+            paymentProductNameLogoImageView.setBackground(drawable);
 
             paymentProductLayout.setOnClickListener(listener);
             coBrandTooltipLayout.addView(paymentProductLayout);

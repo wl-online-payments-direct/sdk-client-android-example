@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="all">
+        <ignore path="src/main/res" />
+    </issue>
+    <issue id="AllowBackup">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+    <issue id="DiscouragedApi">
+        <ignore
+        path="src/main/java/com/onlinepayments/client/android/exampleapp/translation/Translator.java" />
+    </issue>
+</lint>
