@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.onlinepayments.client.android.exampleapp'
+
     compileSdkVersion 33
 
     defaultConfig {
@@ -19,32 +21,42 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
+    lint {
         abortOnError false
         lintConfig file('lint.xml')
     }
 
     buildTypes {
+        debug {
+            buildConfigField "Boolean", "LOGGING_ENABLED", 'true'
+        }
+        // To disable logging in production, you can set the LOGGING_ENABLED field to false in a release build of your app
+        /*
         release {
+            buildConfigField "Boolean", "LOGGING_ENABLED", 'false'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        */
     }
 }
 
 dependencies {
-    implementation 'com.worldline-solutions:sdk-client-android:2.0.4'
+    implementation 'com.worldline-solutions:sdk-client-android:2.1.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
     // Google pay
-    implementation 'com.google.android.gms:play-services-wallet:19.1.0'
+    implementation 'com.google.android.gms:play-services-wallet:19.2.0'
 
     // Allow Multidex
     implementation 'com.android.support:multidex:1.0.3'
 
     // Ensure the same kotlin-stdlib version is used for transitive dependencies
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+
+    // To load logos / images
+    implementation 'com.squareup.picasso:picasso:2.8'
 }

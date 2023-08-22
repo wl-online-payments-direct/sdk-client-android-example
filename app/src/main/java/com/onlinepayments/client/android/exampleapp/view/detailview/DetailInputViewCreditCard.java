@@ -3,8 +3,11 @@ package com.onlinepayments.client.android.exampleapp.view.detailview;
 import android.view.View;
 
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTextWatcher;
+import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
+import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 
 import java.util.List;
 
@@ -14,15 +17,15 @@ import java.util.List;
  * Copyright 2020 Global Collect Services B.V
  */
 public interface DetailInputViewCreditCard extends DetailInputView {
-    void initializeCreditCardField(IinLookupTextWatcher iinLookupTextWatcher);
+    void initializeCreditCardField(IinLookupTextWatcher iinLookupTextWatcher, InputDataPersister inputDataPersister, IinDetailsPersister iinDetailsPersister, boolean hasAccountOnFile);
 
-    void renderLuhnValidationMessage(InputValidationPersister inputValidationPersister);
+    void renderLuhnValidationMessage();
 
-    void renderNotAllowedInContextValidationMessage(InputValidationPersister inputValidationPersister);
+    void renderNotAllowedInContextValidationMessage();
 
-    void removeCreditCardValidationMessage(InputValidationPersister inputValidationPersister);
+    void removeCreditCardValidationMessage();
 
-    void renderPaymentProductLogoByIdInCreditCardField(String productId);
+    void renderPaymentProductLogoByIdInCreditCardField(PaymentItem paymentItem);
 
     void removeDrawableInEditText();
 

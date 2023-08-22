@@ -1,18 +1,22 @@
 package com.onlinepayments.client.android.exampleapp.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCard;
-import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCardImpl;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
+import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.exception.IinStatusNotKnownException;
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTextWatcher;
 import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
-import com.onlinepayments.sdk.client.android.asynctask.IinLookupAsyncTask;
-import com.onlinepayments.sdk.client.android.asynctask.PaymentProductAsyncTask;
+import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCard;
+import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCardImpl;
+import com.onlinepayments.sdk.client.android.listener.IinLookupResponseListener;
+import com.onlinepayments.sdk.client.android.listener.PaymentProductResponseListener;
 import com.onlinepayments.sdk.client.android.model.api.ErrorResponse;
 import com.onlinepayments.sdk.client.android.model.iin.IinDetail;
 import com.onlinepayments.sdk.client.android.model.iin.IinDetailsResponse;
@@ -21,17 +25,14 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Extension to DetailInputActivity that adds extra functionality for credit card payment products
- *
  * Copyright 2020 Global Collect Services B.V
  */
-public class DetailInputActivityCreditCards extends DetailInputActivity
-        implements IinLookupAsyncTask.OnIinLookupCompleteListener,
-        PaymentProductAsyncTask.PaymentProductCallListener,
-        View.OnClickListener {
+public class DetailInputActivityCreditCards extends DetailInputActivity implements View.OnClickListener {
 
     private DetailInputViewCreditCard fieldView;
 
@@ -60,11 +61,34 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
     @Override
     public void onStart() {
         super.onStart();
-        IinLookupTextWatcher iinLookupTextWatcher = new IinLookupTextWatcher(this, session, this, paymentContext);
-        fieldView.initializeCreditCardField(iinLookupTextWatcher);
+
+        boolean hasAccountOnFile = inputDataPersister.getAccountOnFile() != null;
+
+        IinLookupTextWatcher iinLookupTextWatcher = new IinLookupTextWatcher(
+                this,
+                session,
+                paymentContext,
+                new IinLookupResponseListener() {
+                    @Override
+                    public void onSuccess(@NonNull IinDetailsResponse response) {
+                        handleIinDetailsResponse(response);
+                    }
+
+                    @Override
+                    public void onApiError(ErrorResponse errorResponse) {
+                        handleApiErrorOrException();
+                    }
+
+                    @Override
+                    public void onException(Throwable throwable) {
+                        handleApiErrorOrException();
+                    }
+                }
+        );
+        fieldView.initializeCreditCardField(iinLookupTextWatcher, inputDataPersister, iinDetailsPersister, hasAccountOnFile);
 
         if (inputDataPersister.isPaymentProduct()) {
-            fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem().getId());
+            fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem());
         }
 
         if (iinDetailsPersister.getIinDetailsResponse() != null) {
@@ -72,26 +96,9 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
         }
     }
 
-    @Override
-    public void onIinLookupComplete(IinDetailsResponse response) {
-
-        if (response != null) {
-            iinDetailsPersister.setIinDetailsResponse(response);
-        }
-
-        switch (response.getStatus()) {
-            case UNKNOWN: handleIinStatusUnknown(); break;
-            case NOT_ENOUGH_DIGITS: handleIinStatusNotEnoughDigits(); break;
-            case EXISTING_BUT_NOT_ALLOWED: handleIinStatusExistingButNotAllowed(); break;
-            case SUPPORTED: handleIinStatusSupported(response); break;
-            default:
-                throw new IinStatusNotKnownException("This IinStatus is not known");
-        }
-    }
-
     // This function alters the view so that it matches the IinStatus "UNKNOWN"
     private void handleIinStatusUnknown() {
-        fieldView.renderLuhnValidationMessage(inputValidationPersister);
+        fieldView.renderLuhnValidationMessage();
         fieldView.removeDrawableInEditText();
         fieldView.removeCoBrandNotification();
         fieldView.deactivatePayButton();
@@ -99,7 +106,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
 
     // This function alters the view so that it matches the IinStatus "NOT_ENOUGH_DIGITS"
     private void handleIinStatusNotEnoughDigits() {
-        fieldView.removeCreditCardValidationMessage(inputValidationPersister);
+        fieldView.removeCreditCardValidationMessage();
         fieldView.removeCoBrandNotification();
         if (!inputDataPersister.isPaymentProduct()) {
             fieldView.deactivatePayButton();
@@ -108,7 +115,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
 
     // This function alters the. view so that it matches the IinStatus "EXISTING_BUT_NOT_ALLOWED"
     private void handleIinStatusExistingButNotAllowed() {
-        fieldView.renderNotAllowedInContextValidationMessage(inputValidationPersister);
+        fieldView.renderNotAllowedInContextValidationMessage();
         fieldView.removeDrawableInEditText();
         fieldView.removeCoBrandNotification();
         fieldView.deactivatePayButton();
@@ -116,7 +123,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
 
     // This function alters the view so that it is compliable with the IinStatus "EXISTING_BUT_NOT_ALLOWED"
     private void handleIinStatusSupported(IinDetailsResponse response) {
-        fieldView.removeCreditCardValidationMessage(inputValidationPersister);
+        fieldView.removeCreditCardValidationMessage();
         fieldView.activatePayButton();
 
         // Find whether the brand, chosen by the user on the payment product selection screen, is in the IinResponse
@@ -127,7 +134,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
                 if (coBrand.isAllowedInContext() && inputDataPersister.getPaymentItem().getId().equals(coBrand.getPaymentProductId())) {
 
                     // Show the corresponding logo for the Payement Product
-                    fieldView.renderPaymentProductLogoByIdInCreditCardField(coBrand.getPaymentProductId());
+                    fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem());
 
                     // Show the user that he can possibly switch to an other brand with the same card number
                     getCoBrandProductsAndRenderNotification(response);
@@ -165,13 +172,10 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
                         session.getPaymentProduct(this.getApplicationContext(),
                                 iinDetail.getPaymentProductId(),
                                 paymentContext,
-                                new PaymentProductAsyncTask.PaymentProductCallListener() {
-
+                                new PaymentProductResponseListener() {
                                     @Override
-                                    public void onPaymentProductCallComplete(PaymentProduct paymentProduct) {
-                                        if (paymentProduct != null) {
-                                            paymentProductsAllowedInContext.add(paymentProduct);
-                                        }
+                                    public void onSuccess(@NonNull PaymentProduct paymentProduct) {
+                                        paymentProductsAllowedInContext.add(paymentProduct);
                                         if (count.decrementAndGet() < 1) {
                                             // All of the payment products have been retrieved
                                             fieldView.renderCoBrandNotification(paymentProductsAllowedInContext, DetailInputActivityCreditCards.this);
@@ -179,37 +183,19 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
                                     }
 
                                     @Override
-                                    public void onPaymentProductCallError(ErrorResponse error) {
-                                        // Not implemented
+                                    public void onApiError(ErrorResponse errorResponse) {
+                                        handleApiErrorOrException();
+                                    }
+
+                                    @Override
+                                    public void onException(Throwable throwable) {
+                                        handleApiErrorOrException();
                                     }
                                 });
                     }
                 }
             }
         }
-    }
-
-    @Override
-    public void onPaymentProductCallComplete(PaymentProduct paymentProduct) {
-
-        inputDataPersister.setPaymentItem(paymentProduct);
-        View v = fieldView.getViewWithFocus();
-        if (v instanceof EditText) {
-            inputDataPersister.setFocusFieldId((String) v.getTag());
-            inputDataPersister.setCursorPosition(((EditText) v).getSelectionStart());
-        }
-
-        fieldView.removeAllFieldViews();
-        rendered = false;
-
-        // Call renderDynamicContent and onStart to rerender all views
-        renderDynamicContent();
-        onStart();
-    }
-
-    @Override
-    public void onPaymentProductCallError(ErrorResponse error) {
-        // Not implemented
     }
 
     /**
@@ -223,7 +209,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
         PaymentProduct paymentProduct = (PaymentProduct) view.getTag();
 
         // Update the logo in the edit text
-        fieldView.renderPaymentProductLogoByIdInCreditCardField(paymentProduct.getId());
+        fieldView.renderPaymentProductLogoByIdInCreditCardField(paymentProduct);
 
         // Update the request to use the new paymentProduct
         inputDataPersister.setPaymentItem(paymentProduct);
@@ -232,7 +218,41 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
     }
 
     private void retrieveNewPaymentProduct(String paymentProductId) {
-        session.getPaymentProduct(this.getApplicationContext(), paymentProductId, paymentContext, this);
+        session.getPaymentProduct(this.getApplicationContext(), paymentProductId, paymentContext, new PaymentProductResponseListener() {
+            @Override
+            public void onSuccess(@NonNull PaymentProduct paymentProduct) {
+                inputDataPersister.setPaymentItem(paymentProduct);
+                View v = fieldView.getViewWithFocus();
+                if (v instanceof EditText) {
+                    inputDataPersister.setFocusFieldId((String) v.getTag());
+                    inputDataPersister.setCursorPosition(((EditText) v).getSelectionStart());
+                }
+
+                fieldView.removeAllFieldViews();
+                rendered = false;
+
+                // Call renderDynamicContent and onStart to rerender all views
+                renderDynamicContent();
+                onStart();
+
+            }
+
+            @Override
+            public void onApiError(ErrorResponse errorResponse) {
+                handleApiErrorOrException();
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                handleApiErrorOrException();
+            }
+        });
+    }
+
+    private void showIncorrectPaymentProductError () {
+        fieldView.renderLuhnValidationMessage();
+        fieldView.removeCoBrandNotification();
+        fieldView.deactivatePayButton();
     }
 
     @Override
@@ -240,5 +260,50 @@ public class DetailInputActivityCreditCards extends DetailInputActivity
         super.onSaveInstanceState(outState);
 
         outState.putSerializable(Constants.BUNDLE_IINDETAILSPERSISTER, iinDetailsPersister);
+    }
+
+    private void handleIinDetailsResponse(IinDetailsResponse response) {
+        iinDetailsPersister.setIinDetailsResponse(response);
+
+        // If account on file is not null, check the entered payment product id with the aof product id
+        if (inputDataPersister.getAccountOnFile() != null) {
+            String accountOnFileProductId = inputDataPersister.getAccountOnFile().getPaymentProductId();
+            String iinDetailsResponseProductId = response.getPaymentProductId();
+
+            // If entered card number product id does not equal aof product id, show an error message
+            if (!Objects.equals(iinDetailsResponseProductId, accountOnFileProductId)) {
+                // show error message
+                this.showIncorrectPaymentProductError();
+                return;
+            }
+        }
+
+        switch (response.getStatus()) {
+            case UNKNOWN:
+                handleIinStatusUnknown();
+                break;
+            case NOT_ENOUGH_DIGITS:
+                handleIinStatusNotEnoughDigits();
+                break;
+            case EXISTING_BUT_NOT_ALLOWED:
+                handleIinStatusExistingButNotAllowed();
+                break;
+            case SUPPORTED:
+                handleIinStatusSupported(response);
+                break;
+            default:
+                throw new IinStatusNotKnownException("This IinStatus is not known");
+        }
+    }
+
+    private void handleApiErrorOrException() {
+        Context context = getApplicationContext();
+        DialogUtil.showAlertDialog(
+                context,
+                R.string.gc_general_errors_title,
+                R.string.gc_general_errors_mandates_technicalProblem,
+                R.string.gc_app_general_errors_noInternetConnection_button,
+                null
+        );
     }
 }

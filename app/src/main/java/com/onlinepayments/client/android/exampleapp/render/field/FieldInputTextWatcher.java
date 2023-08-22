@@ -18,21 +18,20 @@ import com.onlinepayments.sdk.client.android.model.FormatResult;
 public class FieldInputTextWatcher implements TextWatcher {
 
 	// InputDataPersister is the object where all entered values are stored for a field
-	private InputDataPersister inputDataPersister;
+	protected InputDataPersister inputDataPersister;
 
 	// PaymentProductFieldid needed for storing values in the inputDataPersister
-	private String paymentProductFieldId;
+	protected String paymentProductFieldId;
 
 	// EditText of which the input is changed
-	private EditText editText;
+	protected EditText editText;
 
 	// OldValue and oldCursorIndex, used for calculating new cursorindex
-	private String oldValue;
-	private int start;
-	private int count;
-	private int after;
+	protected String oldValue;
+	protected int start;
+	protected int count;
+	protected int after;
 
-	// The editText for which this textwatcher has been added
 	private Boolean addMask = false;
 
 	// Workaround for having twice called the afterTextChanged,
@@ -85,33 +84,37 @@ public class FieldInputTextWatcher implements TextWatcher {
 			// Format the input if addMask == true
 			if (addMask) {
 
-				// Mask the input
-				Integer cursorIndex = editText.getSelectionStart();
-				FormatResult applyMaskResult = inputDataPersister.getMaskedValue(paymentProductFieldId, s.toString(), oldValue, start, count, after);
-
-				// Render the FormatResult
-				if (applyMaskResult != null) {
-
-					// if the mask result isn't the same as the value entered
-					// replace text with mask result
-					if(!applyMaskResult.getFormattedResult().equals(s.toString())){
-
-						editText.removeTextChangedListener(this);
-						editText.setText(applyMaskResult.getFormattedResult());
-						editText.addTextChangedListener(this);
-					}
-
-					// Set cursorIndex
-					if (applyMaskResult.getCursorIndex() != null) {
-						editText.setSelection(applyMaskResult.getCursorIndex());
-					} else {
-						editText.setSelection(cursorIndex);
-					}
-				}
+				applyMask(s.toString());
 			}
 
 			// Save state of field
 			inputDataPersister.setValue(paymentProductFieldId, editText.getText().toString());
+		}
+	}
+
+	protected void applyMask(String text) {
+		// Mask the input
+		Integer cursorIndex = editText.getSelectionStart();
+		FormatResult applyMaskResult = inputDataPersister.getMaskedValue(paymentProductFieldId, text, oldValue, start, count, after);
+
+		// Render the FormatResult
+		if (applyMaskResult != null) {
+
+			// if the mask result isn't the same as the value entered
+			// replace text with mask result
+			if(!applyMaskResult.getFormattedResult().equals(text)){
+
+				editText.removeTextChangedListener(this);
+				editText.setText(applyMaskResult.getFormattedResult());
+				editText.addTextChangedListener(this);
+			}
+
+			// Set cursorIndex
+			if (applyMaskResult.getCursorIndex() != null) {
+				editText.setSelection(applyMaskResult.getCursorIndex());
+			} else {
+				editText.setSelection(cursorIndex);
+			}
 		}
 	}
 }

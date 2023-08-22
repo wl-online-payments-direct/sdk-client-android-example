@@ -68,9 +68,9 @@ public class RenderValidationMessage implements RenderValidationMessageInterface
 			// Get the to be removed view and remove it
 			View removeView = parentViewGroup.findViewWithTag(VALIDATION_MESSAGE_TAG_PREFIX + fieldId);
 			if (removeView != null) {
-				parentViewGroup.removeView(removeView);
+				ViewGroup removeViewParent = (ViewGroup)removeView.getParent();
+				removeViewParent.removeView(removeView);
 			}
 		}
 	}
-	
 }

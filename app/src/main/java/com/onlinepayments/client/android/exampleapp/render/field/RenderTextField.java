@@ -1,5 +1,7 @@
 package com.onlinepayments.client.android.exampleapp.render.field;
 
+import static com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCardImpl.CREDIT_CARD_NUMBER_FIELD_ID;
+
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -9,13 +11,13 @@ import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.formatter.StringFormatter;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 import java.security.InvalidParameterException;
+import java.util.Objects;
 
 
 /**
@@ -84,7 +86,7 @@ public class RenderTextField implements RenderInputFieldInterface {
 		}
 
 		// Add mask functionality when a mask is set
-		Boolean addMasking = field.getDisplayHints().getMask() != null;
+		boolean addMasking = field.getDisplayHints().getMask() != null;
 
 		Integer maskLength = 0;
 		if (field.getDisplayHints().getMask() != null ) {
@@ -95,15 +97,12 @@ public class RenderTextField implements RenderInputFieldInterface {
 			maskLength = field.getDataRestrictions().getValidator().getLength().getMaxLength();
 		}
 
-
 		// Set values from account on file
 		if (accountOnFile != null) {
 			for (KeyValuePair attribute : accountOnFile.getAttributes()) {
 				if (attribute.getKey().equals(field.getId())) {
-
-					if(field.getDisplayHints().getMask() != null){
-						StringFormatter stringFormatter = new StringFormatter();
-						String maskedValue = stringFormatter.applyMask(field.getDisplayHints().getMask().replace("9", "*"), attribute.getValue());
+					if(field.getType() == PaymentProductField.Type.EXPIRYDATE && addMasking) {
+						String maskedValue = field.applyMask(attribute.getValue());
 						editText.setText(maskedValue);
 					} else {
 						editText.setText(attribute.getValue());
@@ -114,10 +113,13 @@ public class RenderTextField implements RenderInputFieldInterface {
 					}
 				}
 			}
+			// Do not add text changed watcher on credit card number field if it has account on file, a custom watcher will be set in DetailInputViewCreditCardImpl
+			if(!Objects.equals(field.getId(), CREDIT_CARD_NUMBER_FIELD_ID)) {
+				this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
+			}
+		} else {
+			this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
 		}
-
-		// Add OnTextChanged watcher for this inputfield
-		editText.addTextChangedListener(new FieldInputTextWatcher(inputDataPersister, field.getId(), editText, addMasking));
 
 		// get input information from inputDataPersister
 		String paymentProductValue = inputDataPersister.getValue(field.getId());
@@ -129,5 +131,11 @@ public class RenderTextField implements RenderInputFieldInterface {
 		rowView.addView(editText);
 
 		return editText;
+	}
+
+	private void setTextChangedListener(InputDataPersister inputDataPersister, PaymentProductField field, EditText editText, boolean addMasking) {
+		// Add OnTextChanged watcher for input field
+		FieldInputTextWatcher fieldInputTextWatcher = new FieldInputTextWatcher(inputDataPersister, field.getId(), editText, addMasking);
+		editText.addTextChangedListener(fieldInputTextWatcher);
 	}
 }

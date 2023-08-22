@@ -1,14 +1,12 @@
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.sdk.client.android.configuration.Constants;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 
 /** 

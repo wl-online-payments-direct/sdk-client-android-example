@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 
 
 /**
@@ -46,11 +47,13 @@ public class RenderPaymentItem implements RenderPaymentItemInterface {
 		TextView paymentProductNameTextView = paymentProductLayout.findViewById(R.id.paymentProductName);
 		ImageView paymentProductNameLogoImageView = paymentProductLayout.findViewById(R.id.paymentProductLogo);
 
-		// Set payment item name
+		// Set payment item name & logo
 		if (product instanceof BasicPaymentProduct) {
 			if(!product.getDisplayHintsList().isEmpty()) {
-				paymentProductNameTextView.setText(product.getDisplayHintsList().get(0).getLabel());
-				paymentProductNameLogoImageView.setBackground(product.getDisplayHintsList().get(0).getLogo());
+				DisplayHintsPaymentItem displayHints = product.getDisplayHintsList().get(0);
+
+				paymentProductNameTextView.setText(displayHints.getLabel());
+				paymentProductNameLogoImageView.setBackground(displayHints.getLogo());
 			} else {
 				paymentProductNameTextView.setText(parent.getContext().getString(R.string.gc_general_errors_generalError));
 			}

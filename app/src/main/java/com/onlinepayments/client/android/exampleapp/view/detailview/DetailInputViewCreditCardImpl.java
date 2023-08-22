@@ -9,12 +9,17 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.exception.ViewNotInitializedException;
+import com.onlinepayments.client.android.exampleapp.render.field.AccountOnFileCardTextWatcher;
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTextWatcher;
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.RenderIinCoBranding;
-import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
-import com.onlinepayments.sdk.client.android.manager.AssetManager;
+import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
+import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.List;
 
@@ -30,6 +35,10 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
     private EditText creditCardField;
     private RenderIinCoBranding coBrandRenderer;
 
+    // To keep track of the original account on file value, if there is one
+    private String accountOnFileValue;
+
+
     public DetailInputViewCreditCardImpl(Activity activity, @IdRes int id) {
         super (activity, id);
 
@@ -37,48 +46,86 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
     }
 
     @Override
-    public void initializeCreditCardField(IinLookupTextWatcher iinLookupTextWatcher) {
+    public void initializeCreditCardField(IinLookupTextWatcher iinLookupTextWatcher, InputDataPersister inputDataPersister, IinDetailsPersister iinDetailsPersister, boolean hasAccountOnFile) {
         creditCardField = rootView.findViewWithTag(CREDIT_CARD_NUMBER_FIELD_ID);
         if (creditCardField == null) {
-            throw new ViewNotInitializedException("CreditCardField has not been found, did you forget to render the inputfields?");
+            throw new ViewNotInitializedException("CreditCardField has not been found, did you forget to render the input fields?");
         }
-        creditCardField.addTextChangedListener(iinLookupTextWatcher);
+
+        // Only set account on file text changed watcher & focus listener when the product contains account on file
+        if (hasAccountOnFile) {
+            // Only set accountOnFileValue, if no value was previously set
+            if (accountOnFileValue == null) { accountOnFileValue = creditCardField.getText().toString(); }
+            AccountOnFileCardTextWatcher accountOnFileCardTextWatcher = new AccountOnFileCardTextWatcher(inputDataPersister, CREDIT_CARD_NUMBER_FIELD_ID, creditCardField, accountOnFileValue, iinLookupTextWatcher);
+            creditCardField.addTextChangedListener(accountOnFileCardTextWatcher);
+            creditCardField.setHint(accountOnFileValue);
+
+            View.OnFocusChangeListener accountOnFileFocusListener = (v, hasFocus) -> {
+                String creditCardFieldInput = creditCardField.getText().toString();
+
+                // Only clear input when creditCardFieldInput is accountOnFileValue
+                if (hasFocus && creditCardFieldInput.equals(accountOnFileValue)) {
+                   creditCardField.getText().clear();
+                } else if (!hasFocus && creditCardFieldInput.equals("")) {
+                    accountOnFileCardTextWatcher.removeIinLookupTextWatcher();
+                    iinDetailsPersister.setIinDetailsResponse(null);
+
+                    // Only re-set account on file value if nothing was entered
+                    creditCardField.setText(accountOnFileValue);
+
+                    // Handle when the original account on file value was reset
+                    handleResetOriginalAccountOnFileValue();
+                }
+            };
+            creditCardField.setOnFocusChangeListener(accountOnFileFocusListener);
+        } else {
+            // If no account on file, immediately set the iinLookupTextWatcher
+            creditCardField.addTextChangedListener(iinLookupTextWatcher);
+        }
     }
 
     @Override
-    public void renderLuhnValidationMessage(InputValidationPersister inputValidationPersister) {
+    public void renderLuhnValidationMessage() {
         renderValidationHelper.renderValidationMessage(new ValidationErrorMessage("luhn", CREDIT_CARD_NUMBER_FIELD_ID, null), null);
     }
 
     @Override
-    public void renderNotAllowedInContextValidationMessage(InputValidationPersister inputValidationPersister) {
+    public void renderNotAllowedInContextValidationMessage() {
         renderValidationHelper.renderValidationMessage(new ValidationErrorMessage("allowedInContext", CREDIT_CARD_NUMBER_FIELD_ID, null), null);
     }
 
     @Override
-    public void removeCreditCardValidationMessage(InputValidationPersister inputValidationPersister) {
-        renderValidationHelper.removeValidationMessage(renderInputFieldsLayout, CREDIT_CARD_NUMBER_FIELD_ID, inputValidationPersister);
+    public void removeCreditCardValidationMessage() {
+        renderValidationHelper.removeValidationMessage(renderInputFieldsLayout, CREDIT_CARD_NUMBER_FIELD_ID);
     }
 
     @Override
-    public void renderPaymentProductLogoByIdInCreditCardField(String productId) {
+    public void renderPaymentProductLogoByIdInCreditCardField(PaymentItem paymentItem) {
+        // Get the logo from its payment product
+        if (!paymentItem.getDisplayHintsList().isEmpty()) {
+            DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
 
-        // Retrieve the logo from the top most PaymentProduct
-        AssetManager logoManager = AssetManager.getInstance(rootView.getContext().getApplicationContext());
+            Picasso.get()
+                    .load(displayHints.getLogoUrl())
+                    .into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            int scaledHeight = (int) creditCardField.getTextSize();
+                            int scaledWidth = (int) (bitmap.getWidth() * ((double) scaledHeight / (double) bitmap.getHeight()));
 
-        // Get the logo from backgroundimage
-        BitmapDrawable drawable = (BitmapDrawable) logoManager.getLogo(productId);
+                            Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+                            Drawable resizedDrawable = new BitmapDrawable(rootView.getContext().getResources(), resizedBitmap);
 
-        if (drawable != null) {
+                            // Set compoundDrawables allow you to place a image at a certain position
+                            creditCardField.setCompoundDrawablesWithIntrinsicBounds(null, null, resizedDrawable, null);
+                        }
 
-            int scaledHeight = (int) creditCardField.getTextSize();
-            int scaledWidth = (int) (drawable.getIntrinsicWidth() * ((double) scaledHeight / (double) drawable.getIntrinsicHeight()));
+                        @Override
+                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {}
 
-            Bitmap resizedBitmap = Bitmap.createScaledBitmap(drawable.getBitmap(), scaledWidth, scaledHeight, true);
-            Drawable resizedDrawable = new BitmapDrawable(rootView.getContext().getResources(), resizedBitmap);
-
-            // Set compoundDrawables allow you to place a image at a certain position
-            creditCardField.setCompoundDrawablesWithIntrinsicBounds(null, null, resizedDrawable, null);
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {}
+                    });
         }
     }
 
@@ -91,15 +138,11 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
     public void renderCoBrandNotification(List<BasicPaymentItem> paymentProductsAllowedInContext, View.OnClickListener listener) {
         // Show the user he can choose another cobrand if there are indeed more cobrands available
         if (paymentProductsAllowedInContext.size() > 1) {
-
             // Retrieve the logo from the top most PaymentProduct
-            AssetManager logoManager = AssetManager.getInstance(rootView.getContext().getApplicationContext());
-
             coBrandRenderer.renderIinCoBrandNotification(rootView.getContext(),
                     paymentProductsAllowedInContext,
                     renderInputFieldsLayout,
                     CREDIT_CARD_NUMBER_FIELD_ID,
-                    logoManager,
                     listener);
         }
     }
@@ -107,5 +150,10 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
     @Override
     public void removeCoBrandNotification() {
         coBrandRenderer.removeIinCoBrandNotification(renderInputFieldsLayout, CREDIT_CARD_NUMBER_FIELD_ID);
+    }
+
+    private void handleResetOriginalAccountOnFileValue() {
+        removeCreditCardValidationMessage();
+        activatePayButton();
     }
 }

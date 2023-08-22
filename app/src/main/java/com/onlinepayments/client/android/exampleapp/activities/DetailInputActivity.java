@@ -1,6 +1,7 @@
 package com.onlinepayments.client.android.exampleapp.activities;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,11 +11,14 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewImpl;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
+import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
+import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewImpl;
+import com.onlinepayments.sdk.client.android.exception.EncryptDataException;
+import com.onlinepayments.sdk.client.android.listener.PaymentRequestPreparedListener;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.PreparedPaymentRequest;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
@@ -22,7 +26,6 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
 import com.onlinepayments.sdk.client.android.session.Session;
-import com.onlinepayments.sdk.client.android.session.SessionEncryptionHelper.OnPaymentRequestPreparedListener;
 
 import java.util.List;
 
@@ -32,7 +35,7 @@ import java.util.List;
  *
  * Copyright 2020 Global Collect Services B.V
  */
-public class DetailInputActivity extends ShoppingCartActivity implements OnPaymentRequestPreparedListener {
+public class DetailInputActivity extends ShoppingCartActivity {
 
     protected DetailInputViewImpl fieldView;
 
@@ -146,7 +149,17 @@ public class DetailInputActivity extends ShoppingCartActivity implements OnPayme
 
             fieldView.showLoadDialog();
 
-            session.preparePaymentRequest(inputValidationPersister.getPaymentRequest(), getApplicationContext(), this);
+            session.preparePaymentRequest(inputValidationPersister.getPaymentRequest(), getApplicationContext(), new PaymentRequestPreparedListener() {
+                @Override
+                public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
+                    handlePreparedPaymentRequest(preparedPaymentRequest);
+                }
+
+                @Override
+                public void onFailure(EncryptDataException e) {
+                    handlePaymentRequestPreparationFailed();
+                }
+            });
 
         } else {
             // Render validation messages for the invalid fields
@@ -173,8 +186,7 @@ public class DetailInputActivity extends ShoppingCartActivity implements OnPayme
         this.finish();
     }
 
-    @Override
-    public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
+    public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
 
         // Hide progressdialog
         fieldView.hideLoadDialog();
@@ -217,5 +229,21 @@ public class DetailInputActivity extends ShoppingCartActivity implements OnPayme
         outState.putBoolean(Constants.BUNDLE_RENDERED, rendered);
 
         super.onSaveInstanceState(outState);
+    }
+
+    private void handlePaymentRequestPreparationFailed() {
+        fieldView.hideLoadDialog();
+        showTechnicalErrorDialog();
+    }
+
+    private void showTechnicalErrorDialog() {
+        Context context = getApplicationContext();
+        DialogUtil.showAlertDialog(
+                context,
+                R.string.gc_general_errors_title,
+                R.string.gc_general_errors_mandates_technicalProblem,
+                R.string.gc_app_general_errors_noInternetConnection_button,
+                null
+        );
     }
 }

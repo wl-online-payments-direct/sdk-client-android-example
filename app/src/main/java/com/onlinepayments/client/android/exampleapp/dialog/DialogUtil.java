@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+
 
 /**
  * Copyright 2020 Global Collect Services B.V
@@ -16,19 +19,20 @@ public class DialogUtil {
 	private DialogUtil () {
 
 	}
-	
 	/**
 	 * Shows an AlertDialog with the given parameters
 	 * @param context, Context where the AlertDialog is added to
-	 * @param title, the title of the AlertDialog
-	 * @param message, the message of the AlertDialog
-	 * @param buttonText, the buttontext of the AlertDialog
+	 * @param titleId, the String resource identifier for the title of the AlertDialog
+	 * @param messageId, the String resource identifier for the message of the AlertDialog
+	 * @param buttonTextId, the String resource identifier for the buttontext of the AlertDialog
+	 * @param listener, the optional listener for the dialog
 	 */
-	public static AlertDialog showAlertDialog(Context context, String title, String message, String buttonText) {
-		return showAlertDialog(context, title, message, buttonText, null);
-	}
-	
-	public static AlertDialog showAlertDialog(Context context, String title, String message, String buttonText, OnClickListener listener) {
+
+	public static AlertDialog showAlertDialog(Context context, @StringRes Integer titleId, @StringRes Integer messageId, @StringRes Integer buttonTextId, @Nullable OnClickListener listener) {
+
+		String title = context.getString(titleId);
+		String message = context.getString(messageId);
+		String buttonText = context.getString(buttonTextId);
 		
 		// Create a new AlertDialog and set all texts
 		AlertDialog alertDialog = new AlertDialog.Builder(context).create();
@@ -41,12 +45,12 @@ public class DialogUtil {
 				public void onClick(DialogInterface dialog, int which) {}
 			});
 		} else {
-			alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, buttonText, listener);	
+			alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, buttonText, listener);
 		}
 		alertDialog.show();
 		return alertDialog;
 	}
-	
+
 	
 	/**
 	 * Shows a ProgressDialog with the given parameters

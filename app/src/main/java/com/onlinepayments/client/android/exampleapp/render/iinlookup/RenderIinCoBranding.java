@@ -1,8 +1,10 @@
 package com.onlinepayments.client.android.exampleapp.render.iinlookup;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -14,8 +16,10 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.translation.Translator;
-import com.onlinepayments.sdk.client.android.manager.AssetManager;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.security.InvalidParameterException;
 import java.util.List;
@@ -42,14 +46,14 @@ public class RenderIinCoBranding {
 
 
     /**
-     * renders the coBrand notification text underneath the Credit Card number field
+     * Renders the coBrand notification text underneath the Credit Card number field.
+     *
      * @param coBrands The coBrands that are allowed in context and are rendered in the coBrand tooltip
      * @param parentView The over arching view that contains the Credit Card edit text under which the notification will be rendered
      * @param fieldId The Id of the Credit Card edit text
-     * @param logoManager Manager responsible for retrieving Logo's
      * @param listener The OnClick listener that will be attached to the coBrands
      */
-    public void renderIinCoBrandNotification(final Context context, final List<BasicPaymentItem> coBrands, final ViewGroup parentView, final String fieldId, final AssetManager logoManager, final View.OnClickListener listener) {
+    public void renderIinCoBrandNotification(final Context context, final List<BasicPaymentItem> coBrands, final ViewGroup parentView, final String fieldId, final View.OnClickListener listener) {
 
         if (context == null) {
             throw new InvalidParameterException("Error rendering CoBrand tooltip, context may not be null");
@@ -62,9 +66,6 @@ public class RenderIinCoBranding {
         }
         if (fieldId == null ) {
             throw new InvalidParameterException("Error rendering CoBrand tooltip, fieldId may not be null");
-        }
-        if (logoManager == null) {
-            throw new InvalidParameterException("Error rendering CoBrand tooltip, logoManager may not be null");
         }
 
         // Check if there is not already a message of this kind showing in the ViewGroup
@@ -90,7 +91,7 @@ public class RenderIinCoBranding {
                 View parentViewGroup = (ViewGroup)rowView.getParent();
                 View tooltipTextView = parentViewGroup.findViewWithTag(COBRAND_TOOLTIP_TAG_PREFIX + fieldId);
                 if (tooltipTextView == null) {
-                    addCoBrandToolTip(coBrands, rowView, fieldId, logoManager, listener, context);
+                    addCoBrandToolTip(coBrands, rowView, fieldId, listener, context);
                 } else {
                     removeCoBrandTooltip(tooltipTextView);
                 }
@@ -116,7 +117,7 @@ public class RenderIinCoBranding {
         removeCoBrandTooltip(rowView.findViewWithTag(COBRAND_TOOLTIP_TAG_PREFIX + fieldId));
     }
 
-    private void addCoBrandToolTip(List<BasicPaymentItem> paymentProductsAllowedInContext, ViewGroup rowView, String fieldId, AssetManager logoManager, View.OnClickListener listener, Context context) {
+    private void addCoBrandToolTip(List<BasicPaymentItem> paymentProductsAllowedInContext, ViewGroup rowView, String fieldId, View.OnClickListener listener, Context context) {
         // Create a new LinearLayout and add it under the rowView.
         LinearLayout coBrandTooltipLayout = new LinearLayout(rowView.getContext());
         coBrandTooltipLayout.setOrientation(LinearLayout.VERTICAL);
@@ -146,20 +147,35 @@ public class RenderIinCoBranding {
             TextView paymentProductNameTextView         = paymentProductLayout.findViewById(R.id.coBrandPaymentProductName);
             ImageView paymentProductNameLogoImageView   = paymentProductLayout.findViewById(R.id.coBrandPaymentProductLogo);
 
-            // Set payment item name
+            // Set payment item name & logo
             if(!basicPaymentItem.getDisplayHintsList().isEmpty()) {
-                paymentProductNameTextView.setText(basicPaymentItem.getDisplayHintsList().get(0).getLabel());
+                DisplayHintsPaymentItem displayHints = basicPaymentItem.getDisplayHintsList().get(0);
+
+                paymentProductNameTextView.setText(displayHints.getLabel());
+                paymentProductLayout.setOnClickListener(listener);
+
+                Picasso.get()
+                        .load(displayHints.getLogoUrl())
+                        .into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                Drawable drawable = new BitmapDrawable(rowView.getContext().getResources(), bitmap);
+
+                                paymentProductNameLogoImageView.setBackground(drawable);
+                                coBrandTooltipLayout.addView(paymentProductLayout);
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                coBrandTooltipLayout.addView(paymentProductLayout);
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+                        });
             } else {
                 paymentProductNameTextView.setText(context.getString(R.string.gc_general_errors_generalError));
             }
-
-            // Get the logo for the product and set it as the background
-            BitmapDrawable drawable = (BitmapDrawable)logoManager.getLogo(basicPaymentItem.getId());
-
-            paymentProductNameLogoImageView.setBackground(drawable);
-
-            paymentProductLayout.setOnClickListener(listener);
-            coBrandTooltipLayout.addView(paymentProductLayout);
         }
 
         // Add the tooltip view to the ViewGroup

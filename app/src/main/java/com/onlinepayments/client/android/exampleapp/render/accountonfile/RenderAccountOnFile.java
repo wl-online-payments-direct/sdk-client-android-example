@@ -1,10 +1,7 @@
 package com.onlinepayments.client.android.exampleapp.render.accountonfile;
 
-import java.security.InvalidParameterException;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.sdk.client.android.formatter.StringFormatter;
-import com.onlinepayments.sdk.client.android.manager.AssetManager;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileDisplay;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
+
+import java.security.InvalidParameterException;
 
 
 /**
@@ -26,16 +25,16 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
  *
  */
 public class RenderAccountOnFile implements RenderAccountOnFileInterface {
-	
+
 	@SuppressWarnings("deprecation")
 	@Override
-	public void renderAccountOnFile(AccountOnFile accountOnFile, String productId, ViewGroup parent) {
+	public void renderAccountOnFile(AccountOnFile accountOnFile, BasicPaymentItem paymentItem, ViewGroup parent) {
 	
 		if (accountOnFile == null) {
 			throw new InvalidParameterException("Error renderingAccountOnFile, accountOnFile may not be null");
 		}
-		if (productId == null) {
-			throw new InvalidParameterException("Error renderingAccountOnFile, productId may not be null");
+		if (paymentItem == null) {
+			throw new InvalidParameterException("Error renderingAccountOnFile, paymentItem may not be null");
 		}
 		if (parent == null) {
 			throw new InvalidParameterException("Error renderingAccountOnFile, parent may not be null");
@@ -59,26 +58,20 @@ public class RenderAccountOnFile implements RenderAccountOnFileInterface {
 			for (AccountOnFileDisplay displayEntry : accountOnFile.getDisplayHints().getLabelTemplate()) {
 				
 				if (attribute.getKey().equals(displayEntry.getKey())) {
-					
-					// Format the value if there is a mask in the accountonfile text
-					if (displayEntry.getMask() != null ) {
-						StringFormatter stringFormatter = new StringFormatter();
-						String maskedValue = stringFormatter.applyMask(displayEntry.getMask().replace("9", "*"), attribute.getValue());
-						formattedValue = maskedValue;
-					} else {
-						formattedValue = attribute.getValue();
-					}
+					formattedValue = attribute.getValue();
 				}
 			}
 			
 		}
 		accountOnFileTextView.setText(formattedValue);
 		
-		// Set the logo via the AssetManager
-		AssetManager logoManager = AssetManager.getInstance(parent.getContext());
-		Drawable logo = logoManager.getLogo(productId);
+		// Set the logo
+		if (!paymentItem.getDisplayHintsList().isEmpty()) {
+			DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
+			Drawable logo = displayHints.getLogo();
 
-		accountOnFileLogoImageView.setBackground(logo);
+			accountOnFileLogoImageView.setBackground(logo);
+		}
 
 		parent.addView(paymentProductLayout);
 	}	

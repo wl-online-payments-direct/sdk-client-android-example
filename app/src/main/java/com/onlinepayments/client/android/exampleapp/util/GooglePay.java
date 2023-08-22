@@ -1,11 +1,9 @@
 package com.onlinepayments.client.android.exampleapp.util;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.util.Log;
 
-import com.onlinepayments.client.android.exampleapp.activities.PaymentProductSelectionActivity;
-import com.onlinepayments.sdk.client.android.configuration.Constants;
+import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.specificdata.PaymentProduct320SpecificData;

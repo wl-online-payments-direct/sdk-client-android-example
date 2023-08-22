@@ -157,7 +157,7 @@ public class RenderValidationHelper {
 		}
 	}
 
-	public void removeValidationMessage(ViewGroup rowView, String fieldId, InputValidationPersister inputValidationPersister) {
+	public void removeValidationMessage(ViewGroup rowView, String fieldId) {
 
 		if (rowView == null) {
 			throw new InvalidParameterException("Error removing ValidationMessage, rowView may not be null");

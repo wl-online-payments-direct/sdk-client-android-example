@@ -81,11 +81,6 @@ public class RenderCurrency implements RenderInputFieldInterface{
 		if (inputDataPersister.getAccountOnFile() != null) {
 			for (KeyValuePair attribute : inputDataPersister.getAccountOnFile().getAttributes()) {
 				if (attribute.getKey().equals(field.getId())) {
-
-					StringFormatter stringFormatter = new StringFormatter();
-					String maskedValue = stringFormatter.applyMask(field.getDisplayHints().getMask().replace("9", "*"), attribute.getValue());
-					integerPart.setText(maskedValue);
-
 					if (!attribute.isEditingAllowed()) {
 						integerPart.setEnabled(false);
 					}

@@ -7,7 +7,7 @@ package com.onlinepayments.client.android.exampleapp.configuration;
 public class Constants {
 
 	/** Application Identifier, used for identifying the application in network calls **/
-	public static String APPLICATION_IDENTIFIER = "OnlinePayments Android Example Application/v2.0.5";
+	public static String APPLICATION_IDENTIFIER = "OnlinePayments Android Example Application/v2.1.0";
 
 	/** Intent data keys **/
 	public final static String INTENT_PAYMENT_CONTEXT 			 = "paymentContext";
@@ -41,4 +41,9 @@ public class Constants {
 	public final static String MERCHANT_CLIENT_API_URL				= "merchant_client_api_url";
 	public final static String MERCHANT_ASSET_URL					= "merchant_asset_url";
 	public final static String MERCHANT_ENVIRONMENT_IS_PRODUCTION	= "merchant_environmnent_is_production";
+
+	/** Google Pay **/
+	public static final String PAYMENTPRODUCTID_GOOGLEPAY = "320";
+	public static final int GOOGLE_API_VERSION = 2;
+	public final static String GOOGLE_PAY_TOKEN_FIELD_ID = "encryptedPaymentData";
 }

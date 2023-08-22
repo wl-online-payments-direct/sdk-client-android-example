@@ -3,6 +3,7 @@ package com.onlinepayments.client.android.exampleapp.render.accountonfile;
 import android.view.ViewGroup;
 
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 
 /**
  * Defines the rendering of accounts on file interface
@@ -18,10 +19,10 @@ public interface RenderAccountOnFileInterface {
 	 * This AccountOnFile is added to the given parent
 	 * 
 	 * @param accountOnFile, AccountOnFile containing data for the account on file rendering
-	 * @param productId, productId, marking the product belonging to the account on file
+	 * @param paymentItem, the BasicPaymentItem belonging to the account on file
 	 * @param parent, the ViewGroup to which the rendered account on file is added
 	 */
-    void renderAccountOnFile(AccountOnFile accountOnFile, String productId, ViewGroup parent);
+    void renderAccountOnFile(AccountOnFile accountOnFile, BasicPaymentItem paymentItem, ViewGroup parent);
 	
 	
 }

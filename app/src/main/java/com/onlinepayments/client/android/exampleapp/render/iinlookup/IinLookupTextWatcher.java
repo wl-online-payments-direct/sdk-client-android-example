@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 
-import com.onlinepayments.sdk.client.android.asynctask.IinLookupAsyncTask.OnIinLookupCompleteListener;
+import com.onlinepayments.sdk.client.android.listener.IinLookupResponseListener;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.session.Session;
 
@@ -12,7 +12,6 @@ import java.security.InvalidParameterException;
 
 /**
  * Android TextWatcher that is put on Creditcardnumber fields so an IIN lookup can be done
- *
  * Copyright 2020 Global Collect Services B.V
  *
  */
@@ -23,7 +22,7 @@ public class IinLookupTextWatcher implements TextWatcher {
 	private Session session;
 
 	// The listener which will be called by the AsyncTask
-	private OnIinLookupCompleteListener listener;
+	private IinLookupResponseListener listener;
 
 	// The device meta data
 	private Context context;
@@ -38,10 +37,10 @@ public class IinLookupTextWatcher implements TextWatcher {
 	/**
 	 * Constructor
 	 * @param session, Session for getting IinDetails
-	 * @param listener, OnIinLookupComplete which will be called by the AsyncTask
 	 * @param paymentContext, Payment context that will be used in the request for getting IinDetails
+	 * @param listener, IinLookupCompleteListener which will be called by the AsyncTask
 	 */
-	public IinLookupTextWatcher(Context context, Session session, OnIinLookupCompleteListener listener, PaymentContext paymentContext) {
+	public IinLookupTextWatcher(Context context, Session session, PaymentContext paymentContext, IinLookupResponseListener listener) {
 
 		if (context == null) {
 			throw new InvalidParameterException("Error creating IinLookupTextWatcher, context may not be null");

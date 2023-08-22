@@ -32,9 +32,6 @@ public class RenderInputFieldHelper {
 	// Default renderer for tooltips on all fields
 	private RenderLabelInterface labelRenderer = new RenderLabel();
 
-	// Flag to determine if the first focus is set
-	private Boolean isFocusSet = false;
-
 	/**
 	 * Constructor
 	 * @param parentView, the ViewGroup to which all fields are added when rendered
@@ -96,12 +93,6 @@ public class RenderInputFieldHelper {
 			View view = renderer.renderField(field, inputDataPersister, rowContentView, paymentContext);
 			view.setTag(field.getId());
 
-			// Set focus on the first field
-			if (!isFocusSet) {
-				view.requestFocus();
-				isFocusSet = true;
-			}
-
 			// Render tooltip in row
 			if (view.isEnabled()) {
 				tooltipRenderer.renderTooltip(field, paymentItem, rowContentView);
@@ -113,10 +104,5 @@ public class RenderInputFieldHelper {
 			LayoutParams rowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			parentView.addView(rowView, rowParams);
 		}
-	}
-
-
-	public void resetFocus() {
-		isFocusSet = false;
 	}
 }

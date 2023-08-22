@@ -5,14 +5,15 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
-import androidx.annotation.IdRes;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.onlinepayments.client.android.exampleapp.render.accountonfile.RenderAccountOnFile;
-import com.onlinepayments.client.android.exampleapp.render.product.RenderPaymentItem;
+import androidx.annotation.IdRes;
+
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
+import com.onlinepayments.client.android.exampleapp.render.accountonfile.RenderAccountOnFile;
+import com.onlinepayments.client.android.exampleapp.render.product.RenderPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItems;
@@ -66,7 +67,8 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
 
             // Render all accountsOnFile
             for (AccountOnFile accountOnFile : paymentItems.getAccountsOnFile()) {
-                accountOnFileRenderer.renderAccountOnFile(accountOnFile, accountOnFile.getPaymentProductId(), renderAccountOnFilesLayout);
+                BasicPaymentItem correspondingPaymentItem = paymentItems.getBasicPaymentItemById(accountOnFile.getPaymentProductId());
+                accountOnFileRenderer.renderAccountOnFile(accountOnFile, correspondingPaymentItem, renderAccountOnFilesLayout);
             }
         }
     }
@@ -82,26 +84,32 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void hideLoadingIndicator() {
         if (progressDialog.isShowing()) {
-            progressDialog.hide();
+            progressDialog.dismiss();
         }
     }
 
     @Override
     public void showTechnicalErrorDialog(OnClickListener listener) {
-        Context c = rootView.getContext();
-        String title = c.getString(R.string.gc_general_errors_title);
-        String msg = c.getString(R.string.gc_general_errors_techicalProblem);
-        String buttonTxt = c.getString(R.string.gc_app_general_errors_noInternetConnection_button);
-        alertDialog = DialogUtil.showAlertDialog(c, title, msg, buttonTxt, listener);
+        Context context = rootView.getContext();
+        alertDialog = DialogUtil.showAlertDialog(
+                context,
+                R.string.gc_general_errors_title,
+                R.string.gc_general_errors_mandates_technicalProblem,
+                R.string.gc_app_general_errors_noInternetConnection_button,
+                null
+        );
     }
 
     @Override
     public void showNoInternetDialog(OnClickListener listener) {
-        Context c = rootView.getContext();
-        String title = c.getString(R.string.gc_app_general_errors_noInternetConnection_title);
-        String msg = c.getString(R.string.gc_app_general_errors_noInternetConnection_bodytext);
-        String buttonTxt = c.getString(R.string.gc_app_general_errors_noInternetConnection_button);
-        alertDialog = DialogUtil.showAlertDialog(c, title, msg, buttonTxt, listener);
+        Context context = rootView.getContext();
+        alertDialog = DialogUtil.showAlertDialog(
+                context,
+                R.string.gc_app_general_errors_noInternetConnection_title,
+                R.string.gc_app_general_errors_noInternetConnection_bodytext,
+                R.string.gc_app_general_errors_noInternetConnection_button,
+                listener
+        );
     }
 
     @Override
@@ -123,7 +131,7 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void hideAlertDialog() {
         if (alertDialog.isShowing()) {
-            alertDialog.hide();
+            alertDialog.dismiss();
         }
     }
 

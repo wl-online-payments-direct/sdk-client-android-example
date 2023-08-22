@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 import android.view.ViewGroup;
 
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 
 
 /**
@@ -38,8 +39,8 @@ public class RenderAccountOnFileHelper {
 	/**
 	 * Renders the account on file with the default renderer, or with the custom renderer when that is set.
 	 */
-	public void renderAccountOnFile(AccountOnFile accountOnFile, String productId, ViewGroup parent) {
-		renderer.renderAccountOnFile(accountOnFile, productId, parent);
+	public void renderAccountOnFile(AccountOnFile accountOnFile, BasicPaymentItem paymentItem, ViewGroup parent) {
+		renderer.renderAccountOnFile(accountOnFile, paymentItem, parent);
 	}
 	
 }

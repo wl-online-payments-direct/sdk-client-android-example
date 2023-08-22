@@ -1,10 +1,12 @@
 package com.onlinepayments.client.android.exampleapp.activities;
 
-import static com.onlinepayments.sdk.client.android.configuration.Constants.GOOGLE_PAY_TOKEN_FIELD_ID;
-import static com.onlinepayments.sdk.client.android.configuration.Constants.PAYMENTPRODUCTID_GOOGLEPAY;
+import static com.onlinepayments.client.android.exampleapp.configuration.Constants.GOOGLE_PAY_TOKEN_FIELD_ID;
+import static com.onlinepayments.client.android.exampleapp.configuration.Constants.PAYMENTPRODUCTID_GOOGLEPAY;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.PaymentData;
+import com.onlinepayments.client.android.exampleapp.BuildConfig;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.configuration.CheckCommunication;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
@@ -22,15 +25,13 @@ import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.util.GooglePay;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionView;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionViewImpl;
-import com.onlinepayments.sdk.client.android.Util;
-import com.onlinepayments.sdk.client.android.asynctask.BasicPaymentItemsAsyncTask;
-import com.onlinepayments.sdk.client.android.asynctask.PaymentProductAsyncTask;
-import com.onlinepayments.sdk.client.android.communicate.C2sCommunicatorConfiguration;
-import com.onlinepayments.sdk.client.android.manager.AssetManager;
+import com.onlinepayments.sdk.client.android.exception.EncryptDataException;
+import com.onlinepayments.sdk.client.android.listener.BasicPaymentItemsResponseListener;
+import com.onlinepayments.sdk.client.android.listener.PaymentProductResponseListener;
+import com.onlinepayments.sdk.client.android.listener.PaymentRequestPreparedListener;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.PaymentRequest;
 import com.onlinepayments.sdk.client.android.model.PreparedPaymentRequest;
-import com.onlinepayments.sdk.client.android.model.Size;
 import com.onlinepayments.sdk.client.android.model.api.ErrorResponse;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
@@ -38,25 +39,20 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentIt
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 import com.onlinepayments.sdk.client.android.session.Session;
-import com.onlinepayments.sdk.client.android.session.SessionEncryptionHelper;
 
 import org.json.JSONObject;
 
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.Map;
 
 
 /**
  * Activity that lists all the available payment options
- *
  * Copyright 2020 Global Collect Services B.V
  */
-public class PaymentProductSelectionActivity extends ShoppingCartActivity implements BasicPaymentItemsAsyncTask.BasicPaymentItemsCallListener,
-                                                                                     PaymentProductAsyncTask.PaymentProductCallListener,
-                                                                                     SessionEncryptionHelper.OnPaymentRequestPreparedListener,
-                                                                                     DialogInterface.OnClickListener {
+public class PaymentProductSelectionActivity extends ShoppingCartActivity implements DialogInterface.OnClickListener {
 
     private static final String TAG = PaymentProductSelectionActivity.class.getName();
 
@@ -88,6 +84,24 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     private BasicPaymentItems paymentItems;
     private AccountOnFile accountOnFile;
 
+    private final PaymentProductResponseListener paymentProductResponseListener = new PaymentProductResponseListener() {
+        @Override
+        public void onSuccess(@NonNull PaymentProduct paymentProduct) {
+            PaymentProductSelectionActivity.this.paymentProduct = paymentProduct;
+            handlePaymentItemCallBack(paymentProduct);
+        }
+
+        @Override
+        public void onApiError(ErrorResponse errorResponse) {
+            handleApiErrorOrException();
+        }
+
+        @Override
+        public void onException(Throwable throwable) {
+            handleApiErrorOrException();
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,40 +120,62 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
         loadIntentData();
 
-        retrieveClientSessionAndCustomerId();
-
         if (savedInstanceState != null) {
             initializeSavedInstanceStateData(savedInstanceState);
         }
 
         if (paymentItems == null) {
             try {
-                // Instantiate the Session
-                session = C2sCommunicatorConfiguration.initWithClientSessionId(clientSessionId, customerId, clientApiUrl, assetUrl, environmentIsProduction, Constants.APPLICATION_IDENTIFIER);
+                /*
+                 Instantiate the Session.
+                 This session has logging enabled, meaning that requests made to the server and responses received from the server will be logged.
+                 By default logging is disabled.
+                 Logging can also be enabled or disabled at a later stage by calling `session.setLoggingEnabled(Boolean)`.
+                 Logging should be disabled in production.
+                 To ensure that - for example - logging is enabled in debug and disabled in release, you can use a build property whose value depends on the build variant of your app.
+                 */
+                session = new Session(clientSessionId, customerId, clientApiUrl, assetUrl, environmentIsProduction, Constants.APPLICATION_IDENTIFIER, BuildConfig.LOGGING_ENABLED);
             } catch (InvalidParameterException e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, "Instantiating Session failed with: " + e.getMessage());
                 selectionView.showTechnicalErrorDialog(this);
                 return;
             }
 
             selectionView.showLoadingIndicator();
-            session.getBasicPaymentItems(getApplicationContext(), paymentContext, this, groupPaymentProducts);
+            session.getBasicPaymentItems(getApplicationContext(), paymentContext, groupPaymentProducts, new BasicPaymentItemsResponseListener() {
+                @Override
+                public void onSuccess(@NonNull BasicPaymentItems basicPaymentItems) {
+                    if (basicPaymentItems.getBasicPaymentItems() != null && !basicPaymentItems.getBasicPaymentItems().isEmpty()) {
+
+                        paymentItems = basicPaymentItems;
+
+                        selectionView.renderDynamicContent(basicPaymentItems);
+
+                        updateLogos(basicPaymentItems.getBasicPaymentItems());
+                    } else {
+                        selectionView.showTechnicalErrorDialog(PaymentProductSelectionActivity.this);
+                    }
+                    selectionView.hideLoadingIndicator();
+                }
+
+                @Override
+                public void onApiError(ErrorResponse errorResponse) {
+                    handleApiErrorOrException();
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    handleApiErrorOrException();
+                }
+            });
         } else {
             selectionView.renderDynamicContent(paymentItems);
         }
     }
 
-    private void retrieveClientSessionAndCustomerId() {
-        // Send a call to your payment Server to have it retrieve a ClientSession and CustomerId via
-        // the createSession call. These ID's are needed to initialize the Session that
-        // communicates with the API.
-        // In order to make the call via the Server2Server API, please include the Metadata that is
-        // rendered with the method below.
-        @SuppressWarnings("unused")
-        Map<String, String> metadata = Util.getMetadata(getApplicationContext(), Constants.APPLICATION_IDENTIFIER, null);
-
-        // We will not make the call here, but use the values that were provided on the
-        // start-screen instead.
+    private void handleApiErrorOrException() {
+        selectionView.showTechnicalErrorDialog(PaymentProductSelectionActivity.this);
+        selectionView.hideLoadingIndicator();
     }
 
     private void loadIntentData() {
@@ -167,63 +203,46 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         super.onStart();
     }
 
-    @Override
-    public void onBasicPaymentItemsCallComplete(@NonNull BasicPaymentItems paymentItems) {
-        if (paymentItems.getBasicPaymentItems() != null && !paymentItems.getBasicPaymentItems().isEmpty()) {
+    private void updateLogos(List<BasicPaymentItem> basicPaymentItems) {
+        // if you want to specify the size of the logos you update, set your desired width and height
+        int newWidth = 100;
+        int newHeight = 100;
 
-            this.paymentItems = paymentItems;
+        for (BasicPaymentItem paymentItem : basicPaymentItems) {
+            if(!paymentItem.getDisplayHintsList().isEmpty()) {
+                DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
 
-            selectionView.renderDynamicContent(paymentItems);
+                Bitmap originalLogo = ((BitmapDrawable)displayHints.getLogo()).getBitmap();
 
-            updateLogos(session.getAssetUrl(), paymentItems.getBasicPaymentItems());
-        } else {
-            selectionView.showTechnicalErrorDialog(this);
+                BitmapDrawable resizedLogo = this.resizedLogo(originalLogo, newWidth, newHeight);
+
+                displayHints.setLogo(resizedLogo);
+            }
         }
-        selectionView.hideLoadingIndicator();
     }
 
-    @Override
-    public void onBasicPaymentItemsCallError(ErrorResponse error) {
-        selectionView.showTechnicalErrorDialog(this);
-        selectionView.hideLoadingIndicator();
-    }
+    private BitmapDrawable resizedLogo(Bitmap originalLogo, int width, int height) {
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(originalLogo, width, height, true);
 
-    private void updateLogos(String assetUrl, List<BasicPaymentItem> basicPaymentItems) {
-        // if you want to specify the size of the logos you update, set resizedLogo to a size (width, height)
-        Size resizedLogo = new Size(100, 100);
-
-        // if you just want to get the default images, set
-        // resizedLogo = null;
-
-        AssetManager manager = AssetManager.getInstance(getApplicationContext());
-        manager.updateLogos(assetUrl, basicPaymentItems, resizedLogo);
+        return new BitmapDrawable(getResources(), resizedBitmap);
     }
 
     // The callback method for when a user selects a payment product
     public void onPaymentProductSelected(View v) {
         selectionView.showLoadingIndicator();
         if (v.getTag() instanceof BasicPaymentProduct) {
+            // Reset accountOnFile to null, so its contents will not be filled in for a BasicPaymentProduct
+            accountOnFile = null;
             String paymentProductId = ((BasicPaymentProduct) v.getTag()).getId();
-            session.getPaymentProduct(getApplicationContext(), paymentProductId, paymentContext, this);
+            session.getPaymentProduct(getApplicationContext(), paymentProductId, paymentContext, paymentProductResponseListener);
 
         } else if (v.getTag() instanceof AccountOnFile) {
             // Store the Account on file so it can be added to the intent later on.
             accountOnFile = (AccountOnFile) v.getTag();
-            session.getPaymentProduct(getApplicationContext(), accountOnFile.getPaymentProductId(), paymentContext, this);
+            session.getPaymentProduct(getApplicationContext(), accountOnFile.getPaymentProductId(), paymentContext, paymentProductResponseListener);
         } else {
             throw new InvalidParameterException("Tag in view is not of a valid type");
         }
-    }
-
-    @Override
-    public void onPaymentProductCallComplete(PaymentProduct paymentProduct) {
-        this.paymentProduct = paymentProduct;
-        handlePaymentItemCallBack(paymentProduct);
-    }
-
-    @Override
-    public void onPaymentProductCallError(ErrorResponse error) {
-        // Not implemented
     }
 
     // Determine what view should be served next, based on whether the product has inputfields.
@@ -256,7 +275,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     private void startGooglePay(PaymentProduct paymentProduct) {
         if (!merchantId.isEmpty() && !merchantName.isEmpty()) {
             GooglePay googlePay = new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
-            googlePay.start(session.isEnvironmentTypeProduction());
+            googlePay.start(environmentIsProduction);
         } else {
             Toast
                 .makeText(this, "MerchantId & MerchantName cannot be empty when you want to use GooglePay", Toast.LENGTH_LONG)
@@ -270,7 +289,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         // performs default validation on the fields. In some cases this is not enough however. In
         // these cases a subclass of the DetailInputActivity will be loaded that has additional
         // functionality for these specific products/methods.
-        Intent detailInputActivityIntent = null;
+        Intent detailInputActivityIntent;
         if (((PaymentProduct) paymentItem).getPaymentMethod().equals("card")) {
             detailInputActivityIntent = new Intent(this, DetailInputActivityCreditCards.class);
 
@@ -321,7 +340,18 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                         paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, encryptedPaymentData);
                         paymentRequest.validate();
 
-                        session.preparePaymentRequest(paymentRequest, getApplicationContext(), this);
+                        session.preparePaymentRequest(paymentRequest, getApplicationContext(), new PaymentRequestPreparedListener() {
+                            @Override
+                            public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
+                                handlePreparedPaymentRequest(preparedPaymentRequest);
+                            }
+
+                            @Override
+                            public void onFailure(EncryptDataException e) {
+                                Log.e(TAG, "Could not prepare Payment Request due to exception: " + e.getMessage());
+                                handleApiErrorOrException();
+                            }
+                        });
                     } catch (Exception e) {
                         Log.e(TAG, "Could not parse malformed JSON: \"" + jsonString + "\"");
                     }
@@ -345,8 +375,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         }
     }
 
-    @Override
-    public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
+    public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
         // Send the PreparedPaymentRequest to the merchant server, this contains a blob of encrypted values + base64encoded metadata
         //
         // Depending on the response from the merchant server, redirect to one of the following pages:
