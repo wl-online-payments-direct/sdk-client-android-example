@@ -9,7 +9,7 @@ import android.widget.Spinner;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductFieldDisplayElement;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.ValueMap;
@@ -70,7 +70,7 @@ public class RenderList implements RenderInputFieldInterface, AdapterView.OnItem
 		// Set the spinner to the stored value in the account
 		if (inputDataPersister.getAccountOnFile() != null) {
 
-			for (KeyValuePair attribute : inputDataPersister.getAccountOnFile().getAttributes()) {
+			for (AccountOnFileAttribute attribute : inputDataPersister.getAccountOnFile().getAccountOnFileAttributes()) {
 				if (attribute.getKey().equals(field.getId())) {
 					int spinnerPosition = dataAdapter.getPosition(attribute.getValue());
 					spinner.setSelection(spinnerPosition);

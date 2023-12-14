@@ -5,7 +5,7 @@ import android.view.ViewGroup;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.FormElement.ListType;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.FormElement.Type;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 import java.security.InvalidParameterException;
@@ -22,7 +22,7 @@ public class RenderInputDelegate {
 
 
 	// Map containing all custom renderers per FormElement type
-	private HashMap<ListType, RenderInputFieldInterface> customRenderers;
+	private HashMap<Type, RenderInputFieldInterface> customRenderers;
 
 	private RenderInputFieldHelper renderField;
 
@@ -43,7 +43,7 @@ public class RenderInputDelegate {
 	 * @param type, the FormElement for which the custom renderer is registered.
 	 * @param renderer, the renderer that is called when the fields are rendered.
 	 */
-	public void registerCustomFieldRenderer(ListType type, RenderInputFieldInterface renderer) {
+	public void registerCustomFieldRenderer(Type type, RenderInputFieldInterface renderer) {
 
 		if (type == null) {
 			throw new InvalidParameterException("Error registering CustomRenderer, type may not be null");
@@ -93,7 +93,7 @@ public class RenderInputDelegate {
 
 		for (PaymentProductField field : paymentProductFields) {
 
-			RenderInputFieldInterface renderer = registry.getRenderInputFieldForFieldType(field.getDisplayHints().getFormElement().getType());
+			RenderInputFieldInterface renderer = registry.getRenderInputFieldForFieldType(field.getDisplayHints().getFormElement().getFormElementType());
 			if (renderer != null) {
 				renderField.renderField(renderer, field, inputDataPersister, paymentContext);
 			}

@@ -32,7 +32,7 @@ public class FieldInputTextWatcher implements TextWatcher {
 	protected int count;
 	protected int after;
 
-	private Boolean addMask = false;
+	private Boolean addMask;
 
 	// Workaround for having twice called the afterTextChanged,
 	// even if we remove the listener before editing textfield.

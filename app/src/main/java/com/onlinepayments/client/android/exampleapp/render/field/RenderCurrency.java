@@ -11,9 +11,8 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.translation.Translator;
-import com.onlinepayments.sdk.client.android.formatter.StringFormatter;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
@@ -79,7 +78,7 @@ public class RenderCurrency implements RenderInputFieldInterface{
 
 		// Set values from account on file
 		if (inputDataPersister.getAccountOnFile() != null) {
-			for (KeyValuePair attribute : inputDataPersister.getAccountOnFile().getAttributes()) {
+			for (AccountOnFileAttribute attribute : inputDataPersister.getAccountOnFile().getAccountOnFileAttributes()) {
 				if (attribute.getKey().equals(field.getId())) {
 					if (!attribute.isEditingAllowed()) {
 						integerPart.setEnabled(false);

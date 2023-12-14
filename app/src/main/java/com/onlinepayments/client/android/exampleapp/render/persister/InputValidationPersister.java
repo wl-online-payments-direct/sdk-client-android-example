@@ -2,7 +2,7 @@ package com.onlinepayments.client.android.exampleapp.render.persister;
 
 import com.onlinepayments.sdk.client.android.model.PaymentRequest;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
@@ -75,8 +75,8 @@ public class InputValidationPersister implements Serializable {
     }
 
     private boolean isFieldInAccountOnFile(String fieldId, AccountOnFile accountOnFile) {
-        for (KeyValuePair keyValuePair : accountOnFile.getAttributes()) {
-            if (keyValuePair.getKey().equals(fieldId)) {
+        for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
+            if (attribute.getKey().equals(fieldId)) {
                 return true;
             }
         }
@@ -89,9 +89,9 @@ public class InputValidationPersister implements Serializable {
             return true;
         }
 
-        for (KeyValuePair keyValuePair : accountOnFile.getAttributes()) {
-            if (keyValuePair.getKey().equals(field.getId())) {
-                return field.removeMask(value).equals(keyValuePair.getValue());
+        for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
+            if (attribute.getKey().equals(field.getId())) {
+                return field.removeMask(value).equals(attribute.getValue());
             }
         }
         throw new IllegalStateException("No value found in Account on File for the provided FieldId");

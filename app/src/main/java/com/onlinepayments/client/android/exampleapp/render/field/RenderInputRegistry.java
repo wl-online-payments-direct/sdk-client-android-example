@@ -2,7 +2,7 @@ package com.onlinepayments.client.android.exampleapp.render.field;
 
 import java.util.HashMap;
 
-import com.onlinepayments.sdk.client.android.model.paymentproduct.FormElement.ListType;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.FormElement.Type;
 
 /**
  * 
@@ -13,25 +13,25 @@ public class RenderInputRegistry {
 	
 	
 	// Map with custom renderers
-	private HashMap<ListType, RenderInputFieldInterface> customRenderers;
+	private HashMap<Type, RenderInputFieldInterface> customRenderers;
 	
 	// Map with default renderers
-	private HashMap<ListType, RenderInputFieldInterface> defaultRenderers;
+	private HashMap<Type, RenderInputFieldInterface> defaultRenderers;
 	
 	/**
 	 * Constructor
 	 * @param customRenderers, this is the map with custom renderers
 	 */
-	public RenderInputRegistry(HashMap<ListType, RenderInputFieldInterface> customRenderers) {
+	public RenderInputRegistry(HashMap<Type, RenderInputFieldInterface> customRenderers) {
 		this.customRenderers = customRenderers;
 		
 		// Fill the default renderersmap
-		defaultRenderers = new HashMap<ListType, RenderInputFieldInterface>();
-		defaultRenderers.put(ListType.TEXT, new RenderTextField());
-		defaultRenderers.put(ListType.LIST, new RenderList());
-		defaultRenderers.put(ListType.CURRENCY, new RenderCurrency());
-		defaultRenderers.put(ListType.DATE, new RenderDate());
-		defaultRenderers.put(ListType.BOOLEAN, new RenderBoolean());
+		defaultRenderers = new HashMap<Type, RenderInputFieldInterface>();
+		defaultRenderers.put(Type.TEXT, new RenderTextField());
+		defaultRenderers.put(Type.LIST, new RenderList());
+		defaultRenderers.put(Type.CURRENCY, new RenderCurrency());
+		defaultRenderers.put(Type.DATE, new RenderDate());
+		defaultRenderers.put(Type.BOOLEAN, new RenderBoolean());
 	}
 	
 	
@@ -40,7 +40,7 @@ public class RenderInputRegistry {
 	 * @param fieldType, this determines what kind of RenderInputField implementation will be returned   
 	 * @return RenderInputField implementation
 	 */
-	public RenderInputFieldInterface getRenderInputFieldForFieldType(ListType fieldType) {
+	public RenderInputFieldInterface getRenderInputFieldForFieldType(Type fieldType) {
 		
 		// Check the custom renderer map for entries for this fieldType
 		if (customRenderers.containsKey(fieldType)) {

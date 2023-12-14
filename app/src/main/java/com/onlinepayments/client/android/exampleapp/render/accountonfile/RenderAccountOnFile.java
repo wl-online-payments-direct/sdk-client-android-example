@@ -10,9 +10,9 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileDisplay;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 
 import java.security.InvalidParameterException;
@@ -53,12 +53,12 @@ public class RenderAccountOnFile implements RenderAccountOnFileInterface {
 		
 		// Set the correct value 
 		String formattedValue = null;
-		for (KeyValuePair attribute : accountOnFile.getAttributes()) {
+		for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
 			
 			for (AccountOnFileDisplay displayEntry : accountOnFile.getDisplayHints().getLabelTemplate()) {
 				
 				if (attribute.getKey().equals(displayEntry.getKey())) {
-					formattedValue = attribute.getValue();
+					formattedValue = accountOnFile.getMaskedValue(attribute.getKey());
 				}
 			}
 			

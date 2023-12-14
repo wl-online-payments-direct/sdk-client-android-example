@@ -13,8 +13,10 @@ import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.model.validation.AbstractValidationRule;
+import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleLength;
 
 import java.security.InvalidParameterException;
 import java.util.Objects;
@@ -47,12 +49,14 @@ public class RenderTextField implements RenderInputFieldInterface {
 		EditText editText = new EditText(rowView.getContext());
 		editText.setTextAppearance(rowView.getContext(), R.style.TextField);
 
-		if (field.getDataRestrictions().getValidator().getLength() != null) {
-			// Set maxLength for field
-			Integer maxLength = field.getDataRestrictions().getValidator().getLength().getMaxLength();
-			if (maxLength > 0) {
-				editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
-				editText.setEms(maxLength);
+		for (AbstractValidationRule rule: field.getDataRestrictions().getValidationRules()) {
+			if (rule instanceof ValidationRuleLength) {
+				// Set maxLength for field
+				Integer maxLength = ((ValidationRuleLength) rule).getMaxLength();
+				if (maxLength > 0) {
+					editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
+					editText.setEms(maxLength);
+				}
 			}
 		}
 
@@ -86,23 +90,23 @@ public class RenderTextField implements RenderInputFieldInterface {
 		}
 
 		// Add mask functionality when a mask is set
-		boolean addMasking = field.getDisplayHints().getMask() != null;
+		String mask = field.getDisplayHints().getMask();
+		boolean addMasking = mask != null;
 
-		Integer maskLength = 0;
-		if (field.getDisplayHints().getMask() != null ) {
-			maskLength = field.getDisplayHints().getMask().replace("{", "").replace("}", "").length();
+		if (mask != null ) {
+			Integer maskLength = mask.replace("{", "").replace("}", "").length();
 			editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maskLength)});
-		} else if (field.getDataRestrictions().getValidator().getLength() != null) {
-
-			maskLength = field.getDataRestrictions().getValidator().getLength().getMaxLength();
 		}
 
 		// Set values from account on file
 		if (accountOnFile != null) {
-			for (KeyValuePair attribute : accountOnFile.getAttributes()) {
+			for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
 				if (attribute.getKey().equals(field.getId())) {
 					if(field.getType() == PaymentProductField.Type.EXPIRYDATE && addMasking) {
 						String maskedValue = field.applyMask(attribute.getValue());
+						editText.setText(maskedValue);
+					} else if (addMasking) {
+						String maskedValue = accountOnFile.getMaskedValue(attribute.getKey(), mask);
 						editText.setText(maskedValue);
 					} else {
 						editText.setText(attribute.getValue());

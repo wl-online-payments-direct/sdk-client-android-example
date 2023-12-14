@@ -9,7 +9,7 @@ import android.widget.DatePicker.OnDateChangedListener;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.KeyValuePair;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 import java.security.InvalidParameterException;
@@ -55,7 +55,7 @@ public class RenderDate implements RenderInputFieldInterface {
 
         // Set values from account on file
         if (accountOnFile != null) {
-            for (KeyValuePair attribute : accountOnFile.getAttributes()) {
+            for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
                 if (attribute.getKey().equals(field.getId())) {
                     String date = attribute.getValue();
                     setDateFromString(datePicker, date, listener);

@@ -1,9 +1,6 @@
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +14,6 @@ import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 /**
  * This class implements the RenderTooltipInterface and
@@ -38,15 +33,9 @@ public class RenderTooltip implements RenderTooltipInterface {
 	public void renderTooltip(final PaymentProductField field, BasicPaymentItem selectedPaymentProduct, final ViewGroup rowView) {
 		// Get the tooltip text & imageURL
 		final String tooltipText = field.getDisplayHints().getTooltip().getLabel();
-		final String imageUrl = field.getDisplayHints().getTooltip().getImageURL();
 
-		if(imageUrl != null) {
-			// Retrieve the tooltip image, only if an imageURL is available
-			loadTooltipImage(imageUrl, field, rowView, tooltipText);
-		} else {
-			// Set the tooltip text when tooltip has no image
-			renderTooltip(field.getId(), tooltipText, null, rowView);
-		}
+		// Set the tooltip text
+		renderTooltip(field.getId(), tooltipText, rowView);
 	}
 
 	public void renderRememberMeTooltip(Context context, final ViewGroup rowView) {
@@ -55,10 +44,10 @@ public class RenderTooltip implements RenderTooltipInterface {
 		// If not, don't show the tooltip
 		final String tooltipText = context.getString(R.string.gc_app_paymentProductDetails_rememberMe_tooltip);
 
-		renderTooltip("rememberMe", tooltipText, null, rowView);
+		renderTooltip("rememberMe", tooltipText, rowView);
 	}
 
-	private void renderTooltip(final String fieldId, final String tooltipText, final Drawable drawable, final ViewGroup rowView) {
+	private void renderTooltip(final String fieldId, final String tooltipText, final ViewGroup rowView) {
 
 		if (tooltipText != null && !tooltipText.isEmpty() && !Translator.isBadTranslationKey(tooltipText)) {
 			// Add the questionmark tooltip image after the inputfield
@@ -94,7 +83,7 @@ public class RenderTooltip implements RenderTooltipInterface {
 					View parentViewGroup = (ViewGroup)rowView.getParent();
 					View tooltipTextView = parentViewGroup.findViewWithTag(TOOLTIP_TAG + fieldId);
 					if (tooltipTextView == null) {
-						addTooltipTextView(tooltipText, fieldId, rowView, drawable);
+						addTooltipTextView(tooltipText, fieldId, rowView);
 					} else {
 						removeTooltipTextView(tooltipTextView);
 					}
@@ -120,9 +109,8 @@ public class RenderTooltip implements RenderTooltipInterface {
 	 * @param tooltipText, the text that is shown on the screen
 	 * @param fieldId, the id of the belonging paymentproductfield, this is used for setting a unique tag on the textview
 	 * @param rowView, the view under who the textview is added
-	 * @param drawable, this drawable is shown under the tooltiptext
 	 */
-	private void addTooltipTextView(String tooltipText, String fieldId, ViewGroup rowView, Drawable drawable) {
+	private void addTooltipTextView(String tooltipText, String fieldId, ViewGroup rowView) {
 
 		// Create a new LinearLayout and add it under the rowView.
 		LinearLayout tooltipLayout = new LinearLayout(rowView.getContext());
@@ -137,36 +125,7 @@ public class RenderTooltip implements RenderTooltipInterface {
 		tooltipTextView.setText(tooltipText);
 		tooltipLayout.addView(tooltipTextView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-		// Check if there is an drawable to be shown
-		if (drawable != null) {
-			// Create a new ImageView and add it to the tooltipLayout
-			ImageView tooltipImageView = new ImageView(rowView.getContext());
-			// set tooltip image
-			tooltipImageView.setImageDrawable(drawable);
-			tooltipLayout.addView(tooltipImageView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		}
-
 		ViewGroup parentViewGroup = (ViewGroup)rowView.getParent();
 		parentViewGroup.addView(tooltipLayout, parentViewGroup.indexOfChild(rowView) +1, tooltipLayoutParams);
-	}
-
-	private void loadTooltipImage(String imageURL, PaymentProductField field, ViewGroup rowView, String tooltipText) {
-		Picasso.get()
-				.load(imageURL)
-				.into(new Target() {
-					@Override
-					public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-						Drawable drawable = new BitmapDrawable(rowView.getContext().getResources(), bitmap);
-
-						// Set the tooltip text & image
-						renderTooltip(field.getId(), tooltipText, drawable, rowView);
-					}
-
-					@Override
-					public void onBitmapFailed(Exception e, Drawable errorDrawable) {}
-
-					@Override
-					public void onPrepareLoad(Drawable placeHolderDrawable) {}
-				});
 	}
 }
