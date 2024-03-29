@@ -92,7 +92,7 @@ public class RenderCurrency implements RenderInputFieldInterface{
 		linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 		TextView currencySymbol = new TextView(rowView.getContext());
-		currencySymbol.setText(paymentContext.getAmountOfMoney().getCurrencyCodeString());
+		currencySymbol.setText(paymentContext.getAmountOfMoney().getCurrencyCode());
 
 		TextView separator = new TextView(rowView.getContext());
 		String separatorLabel = translator.getPaymentProductFieldLabel(paymentItem.getId(), "separator");

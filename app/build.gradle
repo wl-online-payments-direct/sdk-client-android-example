@@ -42,9 +42,9 @@ android {
 }
 
 dependencies {
-    implementation 'com.worldline-solutions:sdk-client-android:2.2.1'
+    implementation 'com.worldline-solutions:sdk-client-android:2.3.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.apache.commons:commons-lang3:3.13.0'
 

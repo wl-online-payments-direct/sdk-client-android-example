@@ -297,9 +297,8 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
     }
 
     private void handleApiErrorOrException() {
-        Context context = getApplicationContext();
         DialogUtil.showAlertDialog(
-                context,
+                DetailInputActivityCreditCards.this,
                 R.string.gc_general_errors_title,
                 R.string.gc_general_errors_mandates_technicalProblem,
                 R.string.gc_app_general_errors_noInternetConnection_button,

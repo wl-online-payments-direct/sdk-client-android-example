@@ -237,9 +237,8 @@ public class DetailInputActivity extends ShoppingCartActivity {
     }
 
     private void showTechnicalErrorDialog() {
-        Context context = getApplicationContext();
         DialogUtil.showAlertDialog(
-                context,
+                DetailInputActivity.this,
                 R.string.gc_general_errors_title,
                 R.string.gc_general_errors_mandates_technicalProblem,
                 R.string.gc_app_general_errors_noInternetConnection_button,
