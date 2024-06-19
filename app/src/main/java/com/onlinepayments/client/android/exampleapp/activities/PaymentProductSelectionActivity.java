@@ -212,11 +212,13 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             if(!paymentItem.getDisplayHintsList().isEmpty()) {
                 DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
 
-                Bitmap originalLogo = ((BitmapDrawable)displayHints.getLogo()).getBitmap();
+                if (displayHints.getLogo() != null) {
+                    Bitmap originalLogo = ((BitmapDrawable) displayHints.getLogo()).getBitmap();
 
-                BitmapDrawable resizedLogo = this.resizedLogo(originalLogo, newWidth, newHeight);
+                    BitmapDrawable resizedLogo = this.resizedLogo(originalLogo, newWidth, newHeight);
 
-                displayHints.setLogo(resizedLogo);
+                    displayHints.setLogo(resizedLogo);
+                }
             }
         }
     }
@@ -335,8 +337,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
                         String encryptedPaymentData = token;
 
-                        PaymentRequest paymentRequest = new PaymentRequest();
-                        paymentRequest.setPaymentProduct(paymentProduct);
+                        PaymentRequest paymentRequest = new PaymentRequest(paymentProduct);
                         paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, encryptedPaymentData);
                         paymentRequest.validate();
 

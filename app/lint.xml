@@ -10,4 +10,13 @@
         <ignore
         path="src/main/java/com/onlinepayments/client/android/exampleapp/translation/Translator.java" />
     </issue>
+    <!-- Dependency will be removed in the future, so its version can be ignored -->
+    <issue id="NewerVersionAvailable">
+        <ignore regexp="org.apache.commons:commons-lang3*"/>
+    </issue>
+    <!-- Dependency gives a false suggestion that a newer version is available -->
+    <issue id="NewerVersionAvailable">
+        <ignore regexp="com.squareup.picasso:picasso*"/>
+    </issue>
+
 </lint>

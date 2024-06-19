@@ -1,7 +1,6 @@
 package com.onlinepayments.client.android.exampleapp.activities;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -73,7 +72,7 @@ public class DetailInputActivity extends ShoppingCartActivity {
             inputDataPersister.setAccountOnFile(accountOnFile);
         }
 
-        inputValidationPersister = new InputValidationPersister();
+        inputValidationPersister = new InputValidationPersister(paymentItem, accountOnFile);
 
         if (savedInstanceState != null) {
             initializeSavedInstanceStateData(savedInstanceState);

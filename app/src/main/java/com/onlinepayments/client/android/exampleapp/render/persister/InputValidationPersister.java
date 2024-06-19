@@ -3,6 +3,7 @@ package com.onlinepayments.client.android.exampleapp.render.persister;
 import com.onlinepayments.sdk.client.android.model.PaymentRequest;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
@@ -29,17 +30,11 @@ public class InputValidationPersister implements Serializable {
     private List<ValidationErrorMessage> errorMessages = new ArrayList<>();
 
 
-    public InputValidationPersister() {
-        paymentRequest = new PaymentRequest();
+    public InputValidationPersister(PaymentItem paymentItem, AccountOnFile accountOnFile) {
+        paymentRequest = new PaymentRequest((PaymentProduct) paymentItem, accountOnFile);
     }
 
     public List<ValidationErrorMessage> storeAndValidateInput(InputDataPersister inputDataPersister) {
-
-        // Store the paymentProduct and possible AoF in the request
-        paymentRequest.setPaymentProduct((PaymentProduct) inputDataPersister.getPaymentItem());
-        if (inputDataPersister.getAccountOnFile() != null) {
-            paymentRequest.setAccountOnFile(inputDataPersister.getAccountOnFile());
-        }
 
         // Get current field information and store it in the Request
         storeInputFieldDataInPaymentRequest(inputDataPersister);

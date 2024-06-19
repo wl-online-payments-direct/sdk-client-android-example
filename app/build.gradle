@@ -2,6 +2,12 @@ plugins {
     id 'com.android.application'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 android {
     namespace 'com.onlinepayments.client.android.exampleapp'
 
@@ -16,9 +22,8 @@ android {
         multiDexEnabled true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    buildFeatures {
+        buildConfig = true
     }
 
     lint {
@@ -42,21 +47,26 @@ android {
 }
 
 dependencies {
-    implementation 'com.worldline-solutions:sdk-client-android:2.3.0'
+    implementation 'com.worldline-solutions:sdk-client-android:2.4.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // The following dependency will be removed in the future, so its version can be ignored.
+    //noinspection GradleDependency
     implementation 'org.apache.commons:commons-lang3:3.13.0'
 
     // Google pay
-    implementation 'com.google.android.gms:play-services-wallet:19.2.1'
+    implementation 'com.google.android.gms:play-services-wallet:19.3.0'
 
     // Allow Multidex
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     // Ensure the same kotlin-stdlib version is used for transitive dependencies
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.20"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
 
     // To load logos / images
+    // The following dependency gives a false suggestion that a newer version is available, 2.8 is the most recent version.
+    //noinspection GradleDependency
     implementation 'com.squareup.picasso:picasso:2.8'
 }

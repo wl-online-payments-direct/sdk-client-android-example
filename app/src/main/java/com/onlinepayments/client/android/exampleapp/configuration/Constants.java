@@ -7,7 +7,7 @@ package com.onlinepayments.client.android.exampleapp.configuration;
 public class Constants {
 
 	/** Application Identifier, used for identifying the application in network calls **/
-	public static String APPLICATION_IDENTIFIER = "OnlinePayments Android Example Application/v2.1.2";
+	public static String APPLICATION_IDENTIFIER = "OnlinePayments Android Example Application/v2.1.3";
 
 	/** Intent data keys **/
 	public final static String INTENT_PAYMENT_CONTEXT 			 = "paymentContext";
