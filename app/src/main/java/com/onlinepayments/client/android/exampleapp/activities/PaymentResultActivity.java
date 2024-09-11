@@ -18,10 +18,8 @@ public class PaymentResultActivity extends ShoppingCartActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_payment_result);
-		// Initialize the shoppingcart
-		super.initialize(this);
 
-		// Set the correct result
+		// Get the views for displaying the result
 		TextView paymentResultTitle = findViewById(R.id.payment_result_title);
 		TextView paymentResultDescription = findViewById(R.id.payment_result_description);
 
@@ -29,20 +27,15 @@ public class PaymentResultActivity extends ShoppingCartActivity {
 		Intent paymentInputIntent = getIntent();
 		String errorMessage = paymentInputIntent.getStringExtra(Constants.INTENT_ERRORMESSAGE);
 
+		String title = errorMessage == null
+				? getString(R.string.app_result_success_title)
+				: getString(R.string.app_result_failed_title);
 
-		if (errorMessage == null) {
-			// Show success translated texts
-			String successfulTitle = getString(R.string.gc_app_result_success_title);
-			String successfulDescription = getString(R.string.gc_app_result_success_bodyText);
+		String description = errorMessage == null
+				? getString(R.string.app_result_success_bodyText)
+				: getString(R.string.app_result_failed_bodyText);
 
-			paymentResultTitle.setText(successfulTitle);
-			paymentResultDescription.setText(successfulDescription);
-
-		} else {
-
-			// Show errormessage translated texts
-			paymentResultTitle.setText(getString(R.string.gc_app_result_failed_title));
-			paymentResultDescription.setText(getString(R.string.gc_app_result_failed_bodyText));
-		}
+		paymentResultTitle.setText(title);
+		paymentResultDescription.setText(description);
 	}
 }

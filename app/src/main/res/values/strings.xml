@@ -1,9 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!--
-		This file was auto-generated from translations available in the Configuration Center.
-		Any manual changes may be overwritten.
-	-->
-
 	<string name="app_name">Online Payments example application</string>
+
+	<!-- Global App -->
+	<string name="app_loading_title">Loading</string>
+	<string name="app_loading_body">Please wait..</string>
+	<string name="app_securePaymentText">Secure payment</string>
+	<string name="app.shoppingCart_shippingCost">Shipping cost</string>
+	<string name="app_shoppingCart_title">Your order</string>
+	<string name="app_shoppingCart_total">Total</string>
+	<string name="app_cancelButton">Cancel</string>
+	<string name="app_privacy_title">Privacy policy</string>
+	<string name="app_result_failed_title">Your payment failed</string>
+	<string name="app_result_failed_bodyText">We have not been able to process your payment. To continue with this purchase please select an alternative payment method.</string>
+	<string name="app_result_success_title">Your payment status</string>
+	<string name="app_result_success_bodyText">Your payment is successful.</string>
+
+	<!-- Payment Configuration -->
+	<string name="introduction">To process a payment using the services provided by the Online Payments platform, the following information must be provided by a merchant. \n\nAfter providing the information requested below, this example app can process a payment.</string>
+	<string name="clientSessionIdentifierLabel">Client Session Identifier:</string>
+	<string name="customerIdentifierLabel">Customer Identifier:</string>
+	<string name="clientApiUrlLabel">Client API URL:</string>
+	<string name="assetsUrlLabel">Assets URL:</string>
+	<string name="pasteJSON">Paste JSON</string>
+	<string name="merchantIdentifierLabel">Merchant Identifier:</string>
+	<string name="merchantNameLabel">Merchant Name:</string>
+	<string name="amountLabel">Amount in cents:</string>
+	<string name="countryCodeLabel">Country code:</string>
+	<string name="currencyCodeLabel">Currency code:</string>
+	<string name="recurringPaymentLabel">Payment is recurring</string>
+	<string name="enableProductionLabel">Enable production</string>
+	<string name="payNow">Pay securely now</string>
+
+	<!-- Parse JSON Dialog -->
+	<string name="parseJSON_intro">Please paste the full JSON body as received via the Create Client Session API.</string>
+	<string name="parseJSON_hint">Paste JSON here:\n{\n   &quot;assetUrl&quot;: &quot;&quot;,\n   &quot;clientApiUrl&quot;: &quot;&quot;,\n   &quot;clientSessionId&quot;: &quot;&quot;,\n   &quot;customerId&quot;: &quot;&quot;\n}</string>
+	<string name="parseJSON_parse">Parse</string>
+	<string name="parseJSON_dismiss">Dismiss</string>
+
+	<!-- App Error Messages -->
+	<string name="app_errors_noInternetConnection_title">Internet connection error</string>
+	<string name="app_errors_noInternetConnection_bodytext">It seems there is no connection to the internet, please verify that you have an active internet connection and try again.</string>
+	<string name="app_errors_general_button">OK</string>
+	<string name="app_errors_spendingLimitExceeded_title">Spending limit exceeded</string>
+	<string name="app_errors_spendingLimitExceeded_bodyText">You have exceeded the spending limit for this payment. Please try another payment method, or change your order.</string>
+	<string name="app_errors_spendingLimitExceeded_button_changeOrder">Change order</string>
+	<string name="app_errors_spendingLimitExceeded_button_tryOtherMethod">Try other method</string>
+
+	<!-- General error messages -->
+	<string name="errors_generalError">Something went wrong</string>
+	<string name="errors_technicalProblem">A technical error occurred while we were trying to process your payment. Please try again or try another payment method.</string>
+	<string name="errors_title">Payment failure</string>
+
+	<!-- Validation Error Messages -->
+	<string name="validationErrors_allowedInContext">The card you entered is not supported. Please enter another card or try another payment method.</string>
+	<string name="validationErrors_cardholderName">Please provide the name as exactly written on your card</string>
+	<string name="validationErrors_emailAddress">Please provide a valid email address</string>
+	<string name="validationErrors_expirationDate">Please provide a valid expiration date</string>
+	<string name="validationErrors_fixedList">Please select one of the values from the list</string>
+	<string name="validationErrors_iban">Please enter a valid IBAN</string>
+	<string name="validationErrors_iin">Please provide a valid card number</string>
+	<string name="validationErrors_invalidContent">Please provide a value of the correct format</string>
+	<string name="validationErrors_length_between">Please provide a value between {minLength} and {maxLength} characters</string>
+	<string name="validationErrors_length_exact">Please provide a value of exactly {maxLength} characters</string>
+	<string name="validationErrors_length">Please provide a value of maximum of {maxLength} characters</string>
+	<string name="validationErrors_length_max">Please provide a value of maximum of {maxLength} characters</string>
+	<string name="validationErrors_luhn">Please provide a valid card number</string>
+	<string name="validationErrors_range">Please provide a value between {minValue} and {maxValue}</string>
+	<string name="validationErrors_regularExpression">Please provide a value of the correct format</string>
+	<string name="validationErrors_required">Please provide a value</string>
+	<string name="validationErrors_residentIdName">Please provide the exact name as written on your Resident Identity Card</string>
+	<string name="validationErrors_residentIdNumber">Please provide the exact number as written on your Resident Identity Card</string>
+	<string name="validationErrors_termsAndConditions">Please accept the terms and conditions</string>
+
+	<!-- Payment Products -->
+	<string name="paymentProductDetails_payButton">Pay</string>
+	<string name="paymentProductDetails_rememberMe">Remember my details for future purchases</string>
+	<string name="paymentProductDetails_rememberMe_tooltip">If you check this box your payment information will be stored for future purchases.</string>
+
+	<!-- Payment Product Selection -->
+	<string name="paymentProductSelection_accountsOnFileTitle">Previously used accounts</string>
+	<string name="paymentProductSelection_paymentProductsTitle">Other payment products</string>
+
+	<!-- CoBrands -->
+	<string name="cobrands_detected">Multiple payment options detected.</string>
+	<string name="cobrands_fullText">Some cards use multiple brands to process your payment. You can choose your preferred card brand.</string>
+	<string name="cobrands_introText">This card has multiple payment options, please choose your preferred option.</string>
+	<string name="cobrands_readmore">What are multiple payment options?</string>
+	<string name="cobrands_selectbrand">Select your preferred option.</string>
+	<string name="cobrands_toggleCobrands">Multiple payment options detected.</string>
 </resources>

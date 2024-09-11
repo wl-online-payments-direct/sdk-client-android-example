@@ -26,7 +26,7 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="To process a payment using the services provided by the Online Payments platform, the following information must be provided by a merchant. \n\nAfter providing the information requested below, this example app can process a payment." />
+				android:text="@string/introduction" />
 
 			<RelativeLayout
 				android:layout_width="match_parent"
@@ -39,7 +39,7 @@
 					android:id="@+id/text_client_session_identifier"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Client Session Identifier:" />
+					android:text="@string/clientSessionIdentifierLabel" />
 
 				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/client_session_identifier"
@@ -54,7 +54,7 @@
 					android:layout_height="wrap_content"
 					android:layout_below="@id/client_session_identifier"
 					android:layout_marginTop="10dp"
-					android:text="Customer Identifier:" />
+					android:text="@string/customerIdentifierLabel" />
 
 				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/customer_identifier"
@@ -69,7 +69,7 @@
 					android:layout_height="wrap_content"
 					android:layout_below="@id/customer_identifier"
 					android:layout_marginTop="10dp"
-					android:text="Client API URL:" />
+					android:text="@string/clientApiUrlLabel" />
 
 				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/client_api_url"
@@ -84,7 +84,7 @@
 					android:layout_height="wrap_content"
 					android:layout_below="@id/client_api_url"
 					android:layout_marginTop="10dp"
-					android:text="Assets URL:" />
+					android:text="@string/assetsUrlLabel" />
 
 				<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 					android:id="@+id/asset_url"
@@ -103,7 +103,7 @@
 					android:onClick="parseJsonButtonPressed"
 					android:paddingLeft="16dp"
 					android:paddingRight="16dp"
-					android:text="Paste JSON"
+					android:text="@string/pasteJSON"
 					android:textSize="14sp" />
 
 			</RelativeLayout>
@@ -112,7 +112,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:text="Merchant Identifier:" />
+				android:text="@string/merchantIdentifierLabel" />
 
 			<android.widget.EditText
 				android:id="@+id/merchant_identifier"
@@ -124,7 +124,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:text="Merchant Name:" />
+				android:text="@string/merchantNameLabel" />
 
 			<android.widget.EditText
 				android:id="@+id/merchant_name"
@@ -136,7 +136,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:text="Amount in cents:" />
+				android:text="@string/amountLabel" />
 
 			<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 				android:id="@+id/amount"
@@ -148,7 +148,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:text="Country code:" />
+				android:text="@string/countryCodeLabel" />
 
 			<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 				android:id="@+id/country_code"
@@ -160,7 +160,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:text="Currency code:" />
+				android:text="@string/currencyCodeLabel" />
 
 			<com.onlinepayments.client.android.exampleapp.view.ValidationEditText
 				android:id="@+id/currency_code"
@@ -182,7 +182,7 @@
 				<TextView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Payment is recurring" />
+					android:text="@string/recurringPaymentLabel" />
 
 			</LinearLayout>
 
@@ -200,7 +200,7 @@
 				<TextView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Enable production"/>
+					android:text="@string/enableProductionLabel"/>
 
 			</LinearLayout>
 
@@ -210,7 +210,7 @@
 				android:layout_marginTop="10dp"
 				android:background="@drawable/active_button_background"
 				android:onClick="payButtonPressed"
-				android:text="Pay securely now"
+				android:text="@string/payNow"
 				android:textColor="#FFFFFF"
 				android:textSize="20sp"
 				android:textStyle="bold" />

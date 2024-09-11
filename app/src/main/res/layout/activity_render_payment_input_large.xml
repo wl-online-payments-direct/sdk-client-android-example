@@ -62,7 +62,7 @@
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
 								android:layout_weight="1"
-								android:text="@string/gc.app.paymentProductDetails.rememberMe"
+								android:text="@string/paymentProductDetails_rememberMe"
 								android:onClick="rememberMeClicked"
 								style="@style/RememberMeCheckbox" />
 
@@ -82,7 +82,7 @@
 							android:layout_height="wrap_content"
 							android:layout_weight="1"
 							android:clickable="false"
-							android:text="@string/gc.app.paymentProductDetails.payButton" />
+							android:text="@string/paymentProductDetails_payButton" />
 
 						<Button
 							android:id="@+id/payNowButton"
@@ -92,7 +92,7 @@
 							android:layout_weight="1"
 
 							android:onClick="submitInputFields"
-							android:text="@string/gc.app.paymentProductDetails.payButton" />
+							android:text="@string/paymentProductDetails_payButton" />
 
 						<Button
 							android:id="@+id/cancelText"
@@ -102,7 +102,7 @@
 							android:layout_weight="1"
 
 							android:onClick="backToPaymentProductScreen"
-							android:text="@string/gc.app.paymentProductDetails.cancelButton" />
+							android:text="@string/app_cancelButton" />
 
 					</LinearLayout>
 

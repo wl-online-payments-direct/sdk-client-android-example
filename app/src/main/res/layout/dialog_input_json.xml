@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="center_horizontal"
-        android:text="Please paste the full JSON body as received via the Create Client Session API." />
+        android:text="@string/parseJSON_intro" />
 
     <HorizontalScrollView
         android:id="@+id/hzv_json"
@@ -31,7 +31,7 @@
                 android:layout_margin="16dp"
                 android:fontFamily="monospace"
                 android:textSize="12sp"
-                android:hint="Paste JSON here:\n{\n   &quot;assetUrl&quot;: &quot;&quot;,\n   &quot;clientApiUrl&quot;: &quot;&quot;,\n   &quot;clientSessionId&quot;: &quot;&quot;,\n   &quot;customerId&quot;: &quot;&quot;\n}"
+                android:hint="@string/parseJSON_hint"
                 android:importantForAutofill="no"
                 android:inputType="none"
                 android:minWidth="250dp"
@@ -64,7 +64,7 @@
             android:layout_margin="10dp"
             android:paddingLeft="32dp"
             android:paddingRight="32dp"
-            android:text="Dismiss" />
+            android:text="@string/parseJSON_dismiss" />
 
         <Button
             android:id="@+id/parse_json_btn"
@@ -73,7 +73,7 @@
             android:layout_margin="10dp"
             android:paddingLeft="32dp"
             android:paddingRight="32dp"
-            android:text="Parse" />
+            android:text="@string/parseJSON_parse" />
     </LinearLayout>
 
 </RelativeLayout>

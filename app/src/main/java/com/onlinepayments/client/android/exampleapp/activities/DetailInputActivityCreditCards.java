@@ -1,6 +1,5 @@
 package com.onlinepayments.client.android.exampleapp.activities;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -75,12 +74,12 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
                     }
 
                     @Override
-                    public void onApiError(ErrorResponse errorResponse) {
+                    public void onApiError(@NonNull ErrorResponse errorResponse) {
                         handleApiErrorOrException();
                     }
 
                     @Override
-                    public void onException(Throwable throwable) {
+                    public void onException(@NonNull Throwable throwable) {
                         handleApiErrorOrException();
                     }
                 }
@@ -183,12 +182,12 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
                                     }
 
                                     @Override
-                                    public void onApiError(ErrorResponse errorResponse) {
+                                    public void onApiError(@NonNull ErrorResponse errorResponse) {
                                         handleApiErrorOrException();
                                     }
 
                                     @Override
-                                    public void onException(Throwable throwable) {
+                                    public void onException(@NonNull Throwable throwable) {
                                         handleApiErrorOrException();
                                     }
                                 });
@@ -238,12 +237,12 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
             }
 
             @Override
-            public void onApiError(ErrorResponse errorResponse) {
+            public void onApiError(@NonNull ErrorResponse errorResponse) {
                 handleApiErrorOrException();
             }
 
             @Override
-            public void onException(Throwable throwable) {
+            public void onException(@NonNull Throwable throwable) {
                 handleApiErrorOrException();
             }
         });
@@ -256,7 +255,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putSerializable(Constants.BUNDLE_IINDETAILSPERSISTER, iinDetailsPersister);
@@ -299,9 +298,9 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
     private void handleApiErrorOrException() {
         DialogUtil.showAlertDialog(
                 DetailInputActivityCreditCards.this,
-                R.string.gc_general_errors_title,
-                R.string.gc_general_errors_mandates_technicalProblem,
-                R.string.gc_app_general_errors_noInternetConnection_button,
+                R.string.errors_title,
+                R.string.errors_technicalProblem,
+                R.string.app_errors_general_button,
                 null
         );
     }

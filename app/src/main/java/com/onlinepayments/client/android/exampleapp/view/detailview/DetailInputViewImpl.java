@@ -2,26 +2,26 @@ package com.onlinepayments.client.android.exampleapp.view.detailview;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import androidx.annotation.IdRes;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.IdRes;
+
+import com.onlinepayments.client.android.exampleapp.R;
+import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.render.field.RenderInputDelegate;
 import com.onlinepayments.client.android.exampleapp.render.field.RenderTooltip;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
 import com.onlinepayments.client.android.exampleapp.render.validation.RenderValidationHelper;
-import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
 
 /**
  * View for the DetailInputActivity
- *
  * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputViewImpl implements DetailInputView {
@@ -115,8 +115,8 @@ public class DetailInputViewImpl implements DetailInputView {
 
     @Override
     public void showLoadDialog() {
-        String title = rootView.getContext().getString(R.string.gc_app_general_loading_title);
-        String msg = rootView.getContext().getString(R.string.gc_app_general_loading_body);
+        String title = rootView.getContext().getString(R.string.app_loading_title);
+        String msg = rootView.getContext().getString(R.string.app_loading_body);
         progressDialog = DialogUtil.showProgressDialog(rootView.getContext(), title, msg);
     }
 

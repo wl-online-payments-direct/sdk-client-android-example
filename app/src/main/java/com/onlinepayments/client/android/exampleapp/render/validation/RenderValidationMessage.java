@@ -1,7 +1,5 @@
 package com.onlinepayments.client.android.exampleapp.render.validation;
 
-import java.security.InvalidParameterException;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout.LayoutParams;
@@ -9,11 +7,12 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
 
+import java.security.InvalidParameterException;
+
 
 /** 
  * This class implements the RenderValidationMessage and 
  * handles the rendering of the validation message for one paymentproductfield
- * 
  * Copyright 2020 Global Collect Services B.V
  *
  */
@@ -22,10 +21,7 @@ public class RenderValidationMessage implements RenderValidationMessageInterface
 	// Prefix for validationmessage views
 	public static final String VALIDATION_MESSAGE_TAG_PREFIX = "validation_message_";
 
-	// Errormessage layout dimensions
-	private final int TOOLTIP_TEXT_MARGIN = 9;
-	
-	@Override
+    @Override
 	public void renderValidationMessage(String validationMessage, ViewGroup rowView, String fieldId) {
 		
 		if (validationMessage == null ) {
@@ -45,7 +41,9 @@ public class RenderValidationMessage implements RenderValidationMessageInterface
 		validationMessageView.setTextAppearance(rowView.getContext(), R.style.ErrorMessage);
 		
 		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		layoutParams.setMargins(TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN);
+        // Errormessage layout dimensions
+        int TOOLTIP_TEXT_MARGIN = 9;
+        layoutParams.setMargins(TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN);
 		
 		ViewGroup parentViewGroup = (ViewGroup)rowView.getParent();
 		parentViewGroup.addView(validationMessageView, parentViewGroup.indexOfChild(rowView) +1, layoutParams);

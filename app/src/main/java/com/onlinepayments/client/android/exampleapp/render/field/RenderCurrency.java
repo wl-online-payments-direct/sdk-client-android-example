@@ -10,17 +10,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 import java.security.InvalidParameterException;
 
 /**
  * Renders currency field
- *
  * Copyright 2020 Global Collect Services B.V
  *
  */
@@ -43,13 +40,10 @@ public class RenderCurrency implements RenderInputFieldInterface{
 			throw new InvalidParameterException("Error rendering currency, paymentContext may not be null");
 		}
 
-		PaymentItem paymentItem = inputDataPersister.getPaymentItem();
-
 		// Create new EditText and set its style, restrictions, mask and keyboardtype
 		EditText integerPart = new EditText(rowView.getContext());
 		integerPart.setFilters(new InputFilter[]{new InputFilter.LengthFilter(7)}); //maxlength is 9 - 2 so no integer overflow
-		Translator translator = Translator.getInstance(rowView.getContext());
-		String label = translator.getPaymentProductFieldLabel(paymentItem.getId(), field.getId());
+		String label = field.getDisplayHints().getLabel();
 		integerPart.setHint(label);
 
 		// Set correct inputType type
@@ -95,8 +89,6 @@ public class RenderCurrency implements RenderInputFieldInterface{
 		currencySymbol.setText(paymentContext.getAmountOfMoney().getCurrencyCode());
 
 		TextView separator = new TextView(rowView.getContext());
-		String separatorLabel = translator.getPaymentProductFieldLabel(paymentItem.getId(), "separator");
-		separator.setText(separatorLabel);
 
 		EditText decimalPart = new EditText(rowView.getContext());
 		decimalPart.setHint("00");

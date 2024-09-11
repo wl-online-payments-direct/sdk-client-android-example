@@ -1,9 +1,6 @@
 package com.onlinepayments.client.android.exampleapp.render.product;
 
-import java.security.InvalidParameterException;
-
 import android.content.Context;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +12,17 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentIt
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 
+import java.security.InvalidParameterException;
+
 
 /**
  * Renders paymentproducts
- * 
  * Copyright 2020 Global Collect Services B.V
  *
  */
 public class RenderPaymentItem implements RenderPaymentItemInterface {
 		
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void renderPaymentItem(BasicPaymentItem product, ViewGroup parent) {
 		
@@ -55,7 +52,7 @@ public class RenderPaymentItem implements RenderPaymentItemInterface {
 				paymentProductNameTextView.setText(displayHints.getLabel());
 				paymentProductNameLogoImageView.setBackground(displayHints.getLogo());
 			} else {
-				paymentProductNameTextView.setText(parent.getContext().getString(R.string.gc_general_errors_generalError));
+				paymentProductNameTextView.setText(parent.getContext().getString(R.string.errors_generalError));
 			}
 		} else {
 			paymentProductNameTextView.setText(product.getId());

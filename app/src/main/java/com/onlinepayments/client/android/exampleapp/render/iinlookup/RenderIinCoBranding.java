@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
+import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 import com.squareup.picasso.Picasso;
@@ -39,10 +38,6 @@ public class RenderIinCoBranding {
 
     // Prefix for the coBrand tooltip view
     private final String COBRAND_TOOLTIP_TAG_PREFIX = "cobrand_tooltip_";
-
-    // Strings needed to retrieve the correct translations from Strings.xml
-    private final String DETECTED = "detected";
-    private final String INTRO_TEXT = "introText";
 
 
     /**
@@ -76,6 +71,8 @@ public class RenderIinCoBranding {
         // Create a new TextView and add it to the rowView
         final ViewGroup rowView = (ViewGroup) parentView.findViewWithTag(fieldId).getParent();
         TextView iinCoBrandNotificationView = new TextView(rowView.getContext());
+        // Strings needed to retrieve the correct translations from Strings.xml
+        String DETECTED = "detected";
         iinCoBrandNotificationView.setText(translate(DETECTED, context));
         iinCoBrandNotificationView.setPaintFlags(iinCoBrandNotificationView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         iinCoBrandNotificationView.setGravity(Gravity.END);
@@ -83,18 +80,15 @@ public class RenderIinCoBranding {
         iinCoBrandNotificationView.setTextAppearance(rowView.getContext(), R.style.IinCoBrandNotification);
 
         // Set an onclick listener for the notification text, so the coBrand tooltip can toggle
-        iinCoBrandNotificationView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Check if the clicked notification is already showing it's body
-                // If so remove it, or else show it
-                View parentViewGroup = (ViewGroup)rowView.getParent();
-                View tooltipTextView = parentViewGroup.findViewWithTag(COBRAND_TOOLTIP_TAG_PREFIX + fieldId);
-                if (tooltipTextView == null) {
-                    addCoBrandToolTip(coBrands, rowView, fieldId, listener, context);
-                } else {
-                    removeCoBrandTooltip(tooltipTextView);
-                }
+        iinCoBrandNotificationView.setOnClickListener(v -> {
+            // Check if the clicked notification is already showing it's body
+            // If so remove it, or else show it
+            View parentViewGroup = (ViewGroup)rowView.getParent();
+            View tooltipTextView = parentViewGroup.findViewWithTag(COBRAND_TOOLTIP_TAG_PREFIX + fieldId);
+            if (tooltipTextView == null) {
+                addCoBrandToolTip(coBrands, rowView, fieldId, listener, context);
+            } else {
+                removeCoBrandTooltip(tooltipTextView);
             }
         });
 
@@ -129,6 +123,7 @@ public class RenderIinCoBranding {
 
         // Create a new TextView and add it to the coBrandToolTipLayout
         TextView tooltipTextView = new TextView(rowView.getContext());
+        String INTRO_TEXT = "introText";
         tooltipTextView.setText(translate(INTRO_TEXT, context));
         coBrandTooltipLayout.addView(tooltipTextView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
@@ -174,7 +169,7 @@ public class RenderIinCoBranding {
                             public void onPrepareLoad(Drawable placeHolderDrawable) {}
                         });
             } else {
-                paymentProductNameTextView.setText(context.getString(R.string.gc_general_errors_generalError));
+                paymentProductNameTextView.setText(context.getString(R.string.errors_generalError));
             }
         }
 
@@ -190,8 +185,8 @@ public class RenderIinCoBranding {
         }
     }
 
-    private String translate (String coBrandMessageId, Context context) {
-        Translator translator = Translator.getInstance(context);
-        return translator.getCoBrandNotificationText(coBrandMessageId);
+    private String translate(String coBrandMessageId, Context context) {
+        StringProvider stringProvider = StringProvider.getInstance(context);
+        return stringProvider.getCoBrandNotificationText(coBrandMessageId);
     }
 }

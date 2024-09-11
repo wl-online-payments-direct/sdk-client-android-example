@@ -106,8 +106,6 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_payment_product);
-        // Initialize the shoppingcart
-        super.initialize(this);
 
         selectionView = new ProductSelectionViewImpl(this, R.id.payment_product_selection_view_layout);
 
@@ -198,10 +196,10 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         session = (Session) savedInstanceState.getSerializable(Constants.BUNDLE_GC_SESSION);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//    }
 
     private void updateLogos(List<BasicPaymentItem> basicPaymentItems) {
         // if you want to specify the size of the logos you update, set your desired width and height
@@ -327,18 +325,19 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                 case RESULT_OK:
                     PaymentData paymentData = PaymentData.getFromIntent(data);
 
-                    String jsonString = paymentData.toJson();
+                    String paymentDataJSONString = paymentData.toJson();
                     try {
-                        JSONObject jsonJSON = new JSONObject(jsonString);
+                        JSONObject paymentDataJSON = new JSONObject(paymentDataJSONString);
 
-                        JSONObject paymentMethodData = jsonJSON.getJSONObject("paymentMethodData");
+                        JSONObject paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData");
                         JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
-                        String token = tokenizationData.getString("token");
+                        String unformattedGooglePayToken = tokenizationData.getString("token");
 
-                        String encryptedPaymentData = token;
+                        // Token needs to be formatted when using it to create a payment with mobilePaymentMethodSpecificInput.encryptedPaymentData
+                        String formattedGooglePayToken = JSONObject.quote(unformattedGooglePayToken);
 
                         PaymentRequest paymentRequest = new PaymentRequest(paymentProduct);
-                        paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, encryptedPaymentData);
+                        paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, formattedGooglePayToken);
                         paymentRequest.validate();
 
                         session.preparePaymentRequest(paymentRequest, getApplicationContext(), new PaymentRequestPreparedListener() {
@@ -354,7 +353,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                             }
                         });
                     } catch (Exception e) {
-                        Log.e(TAG, "Could not parse malformed JSON: \"" + jsonString + "\"");
+                        Log.e(TAG, "Could not parse malformed JSON: \"" + paymentDataJSONString + "\"");
                     }
 
                     break;

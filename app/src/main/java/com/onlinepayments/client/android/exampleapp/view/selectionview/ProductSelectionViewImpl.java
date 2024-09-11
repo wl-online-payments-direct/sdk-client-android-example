@@ -20,21 +20,20 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentIt
 
 /**
  * View for the Payment Product Selection Activity
- *
  * Copyright 2020 Global Collect Services B.V
  */
 public class ProductSelectionViewImpl implements ProductSelectionView {
 
     // The root of the entire View
-    private View rootView;
+    private final View rootView;
 
     // The Views in which the products/accounts that can be selected from will be rendered
-    private ViewGroup renderAccountOnFilesLayout;
-    private ViewGroup renderProductsLayout;
+    private final ViewGroup renderAccountOnFilesLayout;
+    private final ViewGroup renderProductsLayout;
 
     // Renderhelpers for the dynamic content
-    private RenderPaymentItem paymentItemRenderer;
-    private RenderAccountOnFile accountOnFileRenderer;
+    private final RenderPaymentItem paymentItemRenderer;
+    private final RenderAccountOnFile accountOnFileRenderer;
 
     // Alert- and progressDialog that might be showing. We keep a reference so we will be able to
     // easily close them again.
@@ -76,8 +75,8 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void showLoadingIndicator() {
         Context c = rootView.getContext();
-        String title = c.getString(R.string.gc_app_general_loading_title);
-        String msg = c.getString(R.string.gc_app_general_loading_body);
+        String title = c.getString(R.string.app_loading_title);
+        String msg = c.getString(R.string.app_loading_body);
         progressDialog = DialogUtil.showProgressDialog(c, title, msg);
     }
 
@@ -93,9 +92,9 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
         Context context = rootView.getContext();
         alertDialog = DialogUtil.showAlertDialog(
                 context,
-                R.string.gc_general_errors_title,
-                R.string.gc_general_errors_mandates_technicalProblem,
-                R.string.gc_app_general_errors_noInternetConnection_button,
+                R.string.errors_title,
+                R.string.errors_technicalProblem,
+                R.string.app_errors_general_button,
                 null
         );
     }
@@ -105,9 +104,9 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
         Context context = rootView.getContext();
         alertDialog = DialogUtil.showAlertDialog(
                 context,
-                R.string.gc_app_general_errors_noInternetConnection_title,
-                R.string.gc_app_general_errors_noInternetConnection_bodytext,
-                R.string.gc_app_general_errors_noInternetConnection_button,
+                R.string.app_errors_noInternetConnection_title,
+                R.string.app_errors_noInternetConnection_bodytext,
+                R.string.app_errors_general_button,
                 listener
         );
     }
@@ -115,10 +114,10 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void showSpendingLimitExceededErrorDialog(OnClickListener positiveListener, OnClickListener negativeListener) {
         Context c = rootView.getContext();
-        String title = c.getString(R.string.gc_app_general_errors_spendingLimitExceeded_title);
-        String msg = c.getString(R.string.gc_app_general_errors_spendingLimitExceeded_bodyText);
-        String posButton = c.getString(R.string.gc_app_general_errors_spendingLimitExceeded_button_changeOrder);
-        String negButton = c.getString(R.string.gc_app_general_errors_spendingLimitExceeded_button_tryOtherMethod);
+        String title = c.getString(R.string.app_errors_spendingLimitExceeded_title);
+        String msg = c.getString(R.string.app_errors_spendingLimitExceeded_bodyText);
+        String posButton = c.getString(R.string.app_errors_spendingLimitExceeded_button_changeOrder);
+        String negButton = c.getString(R.string.app_errors_spendingLimitExceeded_button_tryOtherMethod);
         alertDialog = new AlertDialog.Builder(c)
                 .setTitle(title)
                 .setMessage(msg)

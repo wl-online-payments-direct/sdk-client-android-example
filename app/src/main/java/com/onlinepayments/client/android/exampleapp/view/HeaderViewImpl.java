@@ -2,16 +2,19 @@ package com.onlinepayments.client.android.exampleapp.view;
 
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.IdRes;
+import android.content.Intent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.onlinepayments.client.android.exampleapp.util.CurrencyUtil;
+import androidx.annotation.IdRes;
+
 import com.onlinepayments.client.android.exampleapp.R;
+import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCartItem;
+import com.onlinepayments.client.android.exampleapp.util.CurrencyUtil;
 import com.onlinepayments.sdk.client.android.model.PaymentContext;
 
 import java.util.Locale;
@@ -23,18 +26,42 @@ import java.util.Locale;
  */
 public class HeaderViewImpl implements HeaderView {
 
-    private View rootView;
-
-    public HeaderViewImpl(Activity activity, @IdRes int id) {
-        rootView = activity.findViewById(id);
+    private final View headerView;
+    private boolean rendered = false;
+    public boolean isRendered() {
+        return rendered;
     }
 
-    @Override
-    public void renderShoppingCart(ShoppingCart shoppingCart, PaymentContext paymentContext) {
+    public HeaderViewImpl(Activity activity, @IdRes int id) {
+        headerView = activity.findViewById(id);
+        Intent intent = activity.getIntent();
+
+        ShoppingCart shoppingCart = (ShoppingCart) intent.getSerializableExtra(Constants.INTENT_SHOPPINGCART);
+        PaymentContext paymentContext = (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
+
+        if (headerView == null) {
+            throw new RuntimeException("Exception initializing HeaderView - Could not find view with provided header ID: " + id );
+        }
+
+        if (shoppingCart == null) {
+            throw new RuntimeException("Exception initializing HeaderView - ShoppingCart was not present on activity intent");
+        }
+
+        if (paymentContext == null) {
+            throw new RuntimeException("Exception initializing HeaderView - PaymentContext was not present on activity intent");
+        }
+
+        if (!rendered) {
+            renderShoppingCart(shoppingCart, paymentContext);
+            rendered = true;
+        }
+    }
+
+    private void renderShoppingCart(ShoppingCart shoppingCart, PaymentContext paymentContext) {
 
         // Set the totalcost text on the header
-        TextView totalCost = rootView.findViewById(R.id.totalCost);
-        TextView totalCostDetail = rootView.findViewById(R.id.totalCostDetail);
+        TextView totalCost = headerView.findViewById(R.id.totalCost);
+        TextView totalCostDetail = headerView.findViewById(R.id.totalCostDetail);
 
         String formattedTotalAmount = CurrencyUtil.formatAmount(shoppingCart.getTotalAmount(), paymentContext.getCountryCode(), paymentContext.getAmountOfMoney().getCurrencyCode());
         totalCost.setText(formattedTotalAmount);
@@ -45,10 +72,10 @@ public class HeaderViewImpl implements HeaderView {
 
     private void renderOrderDetails(ShoppingCart cart, PaymentContext paymentContext) {
 
-        Context context = rootView.getContext();
+        Context context = headerView.getContext();
 
         // Get the shoppingcartview
-        LinearLayout totalCostDetailsLayout = rootView.findViewById(R.id.totalCostDetailsLayout);
+        LinearLayout totalCostDetailsLayout = headerView.findViewById(R.id.totalCostDetailsLayout);
 
         // Add all shoppingcartitems to the totalCostDetailsLayout
 
@@ -93,18 +120,18 @@ public class HeaderViewImpl implements HeaderView {
 
     @Override
     public void showDetailView() {
-        rootView.findViewById(R.id.totalCostLayout).setVisibility(View.GONE);
-        rootView.findViewById(R.id.totalCostDetailsLayout).setVisibility(View.VISIBLE);
+        headerView.findViewById(R.id.totalCostLayout).setVisibility(View.GONE);
+        headerView.findViewById(R.id.totalCostDetailsLayout).setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideDetailView() {
-        rootView.findViewById(R.id.totalCostLayout).setVisibility(View.VISIBLE);
-        rootView.findViewById(R.id.totalCostDetailsLayout).setVisibility(View.GONE);
+        headerView.findViewById(R.id.totalCostLayout).setVisibility(View.VISIBLE);
+        headerView.findViewById(R.id.totalCostDetailsLayout).setVisibility(View.GONE);
     }
 
     @Override
     public View getRootView() {
-        return rootView;
+        return headerView;
     }
 }

@@ -31,7 +31,6 @@ import java.util.List;
 
 /**
  * DetailInputActivity in which users will be asked for their payment details.
- *
  * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputActivity extends ShoppingCartActivity {
@@ -57,8 +56,6 @@ public class DetailInputActivity extends ShoppingCartActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_render_payment_input);
-        // Initialize the shoppingcart
-        super.initialize(this);
 
         // Set 'rendered' to false, as we know that nothing is rendered since onCreate has been called
         rendered = false;
@@ -185,6 +182,7 @@ public class DetailInputActivity extends ShoppingCartActivity {
         this.finish();
     }
 
+    @SuppressWarnings("unused")
     public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
 
         // Hide progressdialog
@@ -215,7 +213,7 @@ public class DetailInputActivity extends ShoppingCartActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         // Save the current active field and cursorposition
         View v = fieldView.getViewWithFocus();
         if (v instanceof EditText) {
@@ -238,9 +236,9 @@ public class DetailInputActivity extends ShoppingCartActivity {
     private void showTechnicalErrorDialog() {
         DialogUtil.showAlertDialog(
                 DetailInputActivity.this,
-                R.string.gc_general_errors_title,
-                R.string.gc_general_errors_mandates_technicalProblem,
-                R.string.gc_app_general_errors_noInternetConnection_button,
+                R.string.errors_title,
+                R.string.errors_technicalProblem,
+                R.string.app_errors_general_button,
                 null
         );
     }

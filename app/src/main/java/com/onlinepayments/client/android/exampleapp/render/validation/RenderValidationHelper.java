@@ -1,12 +1,10 @@
 package com.onlinepayments.client.android.exampleapp.render.validation;
-import java.security.InvalidParameterException;
-import java.text.MessageFormat;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
+import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
@@ -14,9 +12,11 @@ import com.onlinepayments.sdk.client.android.model.validation.ValidationRule;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleLength;
 import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleRange;
 
+import java.security.InvalidParameterException;
+import java.text.MessageFormat;
+
 /**
  * Helper class for rendering validation messages
- *
  * Copyright 2020 Global Collect Services B.V
  *
  */
@@ -26,9 +26,9 @@ public class RenderValidationHelper {
 	private RenderValidationMessageInterface validationMessageRenderer = new RenderValidationMessage();
 
 	// The parent view to which all validationmessages are added
-	private ViewGroup parentView;
+	private final ViewGroup parentView;
 
-	private Translator translator;
+	private final StringProvider stringProvider;
 
 
 	/**
@@ -42,22 +42,7 @@ public class RenderValidationHelper {
 		}
 
 		this.parentView = parentView;
-		translator = Translator.getInstance(parentView.getContext());
-	}
-
-
-	/**
-	 * Registers a custom validationmessage renderer
-	 * This renderer must implement the RenderValidationMessageInterface interface
-	 *
-	 * @param renderer, the custom renderer which will handle the show and hide of validationmessages
-	 */
-	public void registerCustomRenderer(RenderValidationMessageInterface renderer) {
-
-		if (renderer == null) {
-			throw new InvalidParameterException("Error setting custom messageRenderer, renderer may not be null");
-		}
-		validationMessageRenderer = renderer;
+		stringProvider = StringProvider.getInstance(parentView.getContext());
 	}
 
 	/**
@@ -76,6 +61,14 @@ public class RenderValidationHelper {
 		renderValidationMessageOnScreen(validationResult, paymentItem);
 	}
 
+	private String getValidationMessage(ValidationErrorMessage validationResult) {
+		String errorMessageId = validationResult.getErrorMessage();
+		if ("length".equals(validationResult.getErrorMessage()) && validationResult.getRule() instanceof ValidationRuleLength) {
+			errorMessageId = getCorrectIdentifierForLength(validationResult);
+		}
+		return stringProvider.getValidationMessage(errorMessageId);
+	}
+
 	private void renderValidationMessageOnScreen(ValidationErrorMessage validationResult, PaymentItem paymentItem) {
 
 		String fieldId = validationResult.getPaymentProductFieldId();
@@ -87,13 +80,7 @@ public class RenderValidationHelper {
 			return;
 		}
 
-		String validationMessage;
-
-		if ("length".equals(validationResult.getErrorMessage()) && validationResult.getRule() instanceof ValidationRuleLength) {
-			validationMessage = getCorrectMessageForLength(validationResult);
-		} else {
-			validationMessage = translator.getValidationMessage(validationResult.getErrorMessage());
-		}
+		String validationMessage = getValidationMessage(validationResult);
 
 		if (validationResult.getRule() != null && paymentItem != null) {
 			// Find the correct validationRule and format its message with variables attributes
@@ -146,14 +133,14 @@ public class RenderValidationHelper {
 		return ((ViewGroup) fieldView.getParent().getParent()).findViewWithTag(RenderValidationMessage.VALIDATION_MESSAGE_TAG_PREFIX + fieldId) == null;
 	}
 
-	private String getCorrectMessageForLength (ValidationErrorMessage validationResult) {
+	private String getCorrectIdentifierForLength(ValidationErrorMessage validationResult) {
 		ValidationRuleLength validationRuleLength = (ValidationRuleLength) validationResult.getRule();
 		if (validationRuleLength.getMaxLength().equals(validationRuleLength.getMinLength())) {
-			return translator.getValidationMessage("length.exact");
+			return "length_exact";
 		} else if ((validationRuleLength.getMinLength() == null || validationRuleLength.getMinLength().equals(0))) {
-			return translator.getValidationMessage("length.max");
+			return "length_max";
 		} else {
-			return translator.getValidationMessage("length.between");
+			return "length_between";
 		}
 	}
 

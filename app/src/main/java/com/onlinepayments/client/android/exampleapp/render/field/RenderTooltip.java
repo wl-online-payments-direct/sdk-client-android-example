@@ -10,27 +10,20 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.onlinepayments.client.android.exampleapp.translation.Translator;
 import com.onlinepayments.client.android.exampleapp.R;
+import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
 
 /**
  * This class implements the RenderTooltipInterface and
  * handles the rendering of the tooltip for one paymentproductfield
- *
  * Copyright 2020 Global Collect Services B.V
  *
  */
 public class RenderTooltip implements RenderTooltipInterface {
 
-	// Tooltip layout dimensions
-	private final int TOOLTIP_MARGIN_TOP_CHECKBOX = 10;
-
-	// Tooltip text layout dimensions
-	private final int TOOLTIP_TEXT_MARGIN = 9;
-
-	public void renderTooltip(final PaymentProductField field, BasicPaymentItem selectedPaymentProduct, final ViewGroup rowView) {
+    public void renderTooltip(final PaymentProductField field, BasicPaymentItem selectedPaymentProduct, final ViewGroup rowView) {
 		// Get the tooltip text & imageURL
 		final String tooltipText = field.getDisplayHints().getTooltip().getLabel();
 
@@ -42,14 +35,14 @@ public class RenderTooltip implements RenderTooltipInterface {
 
 		// Check if the translated tooltip text is in the translationsfile.
 		// If not, don't show the tooltip
-		final String tooltipText = context.getString(R.string.gc_app_paymentProductDetails_rememberMe_tooltip);
+		final String tooltipText = context.getString(R.string.paymentProductDetails_rememberMe_tooltip);
 
 		renderTooltip("rememberMe", tooltipText, rowView);
 	}
 
 	private void renderTooltip(final String fieldId, final String tooltipText, final ViewGroup rowView) {
 
-		if (tooltipText != null && !tooltipText.isEmpty() && !Translator.isBadTranslationKey(tooltipText)) {
+		if (tooltipText != null && !tooltipText.isEmpty() && !StringProvider.isBadTranslationKey(tooltipText)) {
 			// Add the questionmark tooltip image after the inputfield
 			ImageView tooltipImage = new ImageView(rowView.getContext());
 			tooltipImage.setBackgroundResource(R.drawable.ic_action_about);
@@ -63,7 +56,8 @@ public class RenderTooltip implements RenderTooltipInterface {
 			for (int childCount = 0; childCount < rowView.getChildCount(); childCount++) {
 				View child = rowView.getChildAt(childCount);
 				if (child instanceof CheckBox) {
-					tooltipLayoutParams.topMargin = TOOLTIP_MARGIN_TOP_CHECKBOX;
+                    // Tooltip layout dimensions
+                    tooltipLayoutParams.topMargin = 10;
 				}
 			}
 
@@ -73,22 +67,18 @@ public class RenderTooltip implements RenderTooltipInterface {
 			rowView.addView(tooltipImage, tooltipLayoutParams);
 
 			// Add onClickListener for the tooltip image
-			tooltipImage.setOnClickListener(new View.OnClickListener() {
+			tooltipImage.setOnClickListener(view -> {
 
-				@Override
-				public void onClick(View view) {
-
-					// Check if the clicked tooltip is already showing it's text
-					// If so remove it, or else show it
-					View parentViewGroup = (ViewGroup)rowView.getParent();
-					View tooltipTextView = parentViewGroup.findViewWithTag(TOOLTIP_TAG + fieldId);
-					if (tooltipTextView == null) {
-						addTooltipTextView(tooltipText, fieldId, rowView);
-					} else {
-						removeTooltipTextView(tooltipTextView);
-					}
-				}
-			});
+                // Check if the clicked tooltip is already showing it's text
+                // If so remove it, or else show it
+                View parentViewGroup = (ViewGroup)rowView.getParent();
+                View tooltipTextView = parentViewGroup.findViewWithTag(TOOLTIP_TAG + fieldId);
+                if (tooltipTextView == null) {
+                    addTooltipTextView(tooltipText, fieldId, rowView);
+                } else {
+                    removeTooltipTextView(tooltipTextView);
+                }
+            });
 		}
 	}
 
@@ -118,7 +108,9 @@ public class RenderTooltip implements RenderTooltipInterface {
 		tooltipLayout.setBackgroundResource(R.drawable.special_section_background);
 		tooltipLayout.setTag(TOOLTIP_TAG + fieldId);
 		LayoutParams tooltipLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		tooltipLayoutParams.setMargins(TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN);
+        // Tooltip text layout dimensions
+        int TOOLTIP_TEXT_MARGIN = 9;
+        tooltipLayoutParams.setMargins(TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN, TOOLTIP_TEXT_MARGIN);
 
 		// Create a new TextView and add it to the tooltipLayout
 		TextView tooltipTextView = new TextView(rowView.getContext());
