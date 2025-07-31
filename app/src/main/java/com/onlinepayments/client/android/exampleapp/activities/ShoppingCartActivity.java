@@ -7,12 +7,9 @@ import androidx.fragment.app.FragmentActivity;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.view.HeaderViewImpl;
 
-
 /**
- *  Toggles the shoppingcart details when its clicked
- *
- *  Copyright 2020 Global Collect Services B.V
- *
+ * Toggles the shoppingCart details when its clicked
+ * Copyright 2020 Global Collect Services B.V
  */
 public class ShoppingCartActivity extends FragmentActivity {
 

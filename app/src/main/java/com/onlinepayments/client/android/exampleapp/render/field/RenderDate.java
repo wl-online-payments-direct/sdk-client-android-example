@@ -1,6 +1,5 @@
 package com.onlinepayments.client.android.exampleapp.render.field;
 
-import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
@@ -17,23 +16,29 @@ import java.util.Calendar;
 
 /**
  * This class handles all rendering of Date fields
- *
  * Copyright 2020 Global Collect Services B.V
  */
 public class RenderDate implements RenderInputFieldInterface {
 
     @Override
-    public View renderField(PaymentProductField field, InputDataPersister inputDataPersister,
-                            ViewGroup rowView, PaymentContext paymentContext) {
+    public View renderField(
+        PaymentProductField field,
+        InputDataPersister inputDataPersister,
+        ViewGroup rowView,
+        PaymentContext paymentContext
+    ) {
 
         if (field == null) {
-            throw new InvalidParameterException("Error rendering datefield, field may not be null");
+            throw new InvalidParameterException("Error rendering dateField, field may not be null");
         }
+
         if (rowView == null) {
-            throw new InvalidParameterException("Error rendering datefield, rowView may not be null");
+            throw new InvalidParameterException("Error rendering dateField, rowView may not be null");
         }
+
         if (inputDataPersister == null) {
-            throw new InvalidParameterException("Error rendering datefield, inputDataPersister may not be null");
+            throw new InvalidParameterException(
+                "Error rendering dateField, inputDataPersister may not be null");
         }
 
         AccountOnFile accountOnFile = inputDataPersister.getAccountOnFile();
@@ -44,7 +49,8 @@ public class RenderDate implements RenderInputFieldInterface {
         datePicker.setSpinnersShown(true);
 
         // Create a listener here, which we can use to provide to all init calls
-        OnDateChangedListener listener = createOnDateChangedListener(inputDataPersister, field.getId());
+        OnDateChangedListener listener =
+            createOnDateChangedListener(inputDataPersister, field.getId());
 
         final Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -55,7 +61,7 @@ public class RenderDate implements RenderInputFieldInterface {
 
         // Set values from account on file
         if (accountOnFile != null) {
-            for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
+            for (AccountOnFileAttribute attribute : accountOnFile.getAttributes()) {
                 if (attribute.getKey().equals(field.getId())) {
                     String date = attribute.getValue();
                     setDateFromString(datePicker, date, listener);
@@ -78,34 +84,35 @@ public class RenderDate implements RenderInputFieldInterface {
         return datePicker;
     }
 
-    private void setDateFromString(DatePicker datePicker, String dateString, OnDateChangedListener listener) {
+    private void setDateFromString(
+        DatePicker datePicker, String dateString, OnDateChangedListener listener
+    ) {
         // The date is in YYYYMMDD format, so it can be decomposed like so
-        int year = Integer.parseInt(dateString.substring(0,4));
-        int month = Integer.parseInt(dateString.substring(4,6));
-        int day = Integer.parseInt(dateString.substring(6,8));
+        int year = Integer.parseInt(dateString.substring(0, 4));
+        int month = Integer.parseInt(dateString.substring(4, 6));
+        int day = Integer.parseInt(dateString.substring(6, 8));
 
         month--; // Months are 0-based in Android
         datePicker.init(year, month, day, listener);
     }
 
-    private OnDateChangedListener createOnDateChangedListener(final InputDataPersister inputDataPersister, final String fieldId) {
-        return new OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker datePicker, int year, int month, int day) {
-                month++; // Months are 0 based in Android
-                String monthString = Integer.toString(month);
-                if (monthString.length() == 1) {
-                    monthString = "0" + month;
-                }
-
-                String dayString = Integer.toString(day);
-                if (dayString.length() == 1) {
-                    dayString = "0" + dayString;
-                }
-                String newDate = "" + year + monthString + dayString;
-                inputDataPersister.setValue(fieldId, newDate);
-                inputDataPersister.setFocusFieldId(fieldId);
+    private OnDateChangedListener createOnDateChangedListener(
+        final InputDataPersister inputDataPersister, final String fieldId
+    ) {
+        return (datePicker, year, month, day) -> {
+            month++; // Months are 0 based in Android
+            String monthString = Integer.toString(month);
+            if (monthString.length() == 1) {
+                monthString = "0" + month;
             }
+
+            String dayString = Integer.toString(day);
+            if (dayString.length() == 1) {
+                dayString = "0" + dayString;
+            }
+            String newDate = year + monthString + dayString;
+            inputDataPersister.setValue(fieldId, newDate);
+            inputDataPersister.setFocusFieldId(fieldId);
         };
     }
 }

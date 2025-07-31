@@ -2,8 +2,9 @@ package com.onlinepayments.client.android.exampleapp.model;
 
 /**
  * Pojo that contains redirection information for redirect payment products
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
+ * </p>
  */
 public class RedirectData {
 

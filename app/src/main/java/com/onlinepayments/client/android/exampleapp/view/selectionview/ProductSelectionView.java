@@ -7,7 +7,7 @@ import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentIt
 
 /**
  * Interface for the Product selection view
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
  */
 public interface ProductSelectionView extends GeneralView {
@@ -22,7 +22,12 @@ public interface ProductSelectionView extends GeneralView {
 
     void showNoInternetDialog(OnClickListener listener);
 
-    void showSpendingLimitExceededErrorDialog(OnClickListener positiveListener, OnClickListener negativeListener);
+    void showSpendingLimitExceededErrorDialog(
+        OnClickListener positiveListener, OnClickListener negativeListener
+    );
 
+    /**
+     * @noinspection unused
+     */
     void hideAlertDialog();
 }

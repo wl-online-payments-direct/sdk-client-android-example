@@ -5,8 +5,6 @@ import static com.onlinepayments.client.android.exampleapp.configuration.Constan
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +21,7 @@ import com.onlinepayments.client.android.exampleapp.configuration.CheckCommunica
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.util.GooglePay;
+import com.onlinepayments.client.android.exampleapp.util.SessionManager;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionView;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionViewImpl;
 import com.onlinepayments.sdk.client.android.exception.EncryptDataException;
@@ -34,25 +33,23 @@ import com.onlinepayments.sdk.client.android.model.PaymentRequest;
 import com.onlinepayments.sdk.client.android.model.PreparedPaymentRequest;
 import com.onlinepayments.sdk.client.android.model.api.ErrorResponse;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItems;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
 import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
 import com.onlinepayments.sdk.client.android.session.Session;
 
 import org.json.JSONObject;
 
 import java.security.InvalidParameterException;
-import java.util.List;
-
+import java.util.Objects;
 
 /**
  * Activity that lists all the available payment options
  * Copyright 2020 Global Collect Services B.V
  */
-public class PaymentProductSelectionActivity extends ShoppingCartActivity implements DialogInterface.OnClickListener {
+public class PaymentProductSelectionActivity extends ShoppingCartActivity implements
+    DialogInterface.OnClickListener {
 
     private static final String TAG = PaymentProductSelectionActivity.class.getName();
 
@@ -77,37 +74,38 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
     // Variables required to retrieve the payment items that are available for payment
     private PaymentContext paymentContext;
-    private boolean groupPaymentProducts;
     private PaymentProduct paymentProduct;
 
     // Loaded payment product and selected Account On File information
     private BasicPaymentItems paymentItems;
     private AccountOnFile accountOnFile;
 
-    private final PaymentProductResponseListener paymentProductResponseListener = new PaymentProductResponseListener() {
-        @Override
-        public void onSuccess(@NonNull PaymentProduct paymentProduct) {
-            PaymentProductSelectionActivity.this.paymentProduct = paymentProduct;
-            handlePaymentItemCallBack(paymentProduct);
-        }
+    private final PaymentProductResponseListener paymentProductResponseListener =
+        new PaymentProductResponseListener() {
+            @Override
+            public void onSuccess(@NonNull PaymentProduct paymentProduct) {
+                PaymentProductSelectionActivity.this.paymentProduct = paymentProduct;
+                handlePaymentItemCallBack(paymentProduct);
+            }
 
-        @Override
-        public void onApiError(ErrorResponse errorResponse) {
-            handleApiErrorOrException();
-        }
+            @Override
+            public void onApiError(@NonNull ErrorResponse errorResponse) {
+                handleApiErrorOrException();
+            }
 
-        @Override
-        public void onException(Throwable throwable) {
-            handleApiErrorOrException();
-        }
-    };
+            @Override
+            public void onException(@NonNull Throwable throwable) {
+                handleApiErrorOrException();
+            }
+        };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_payment_product);
 
-        selectionView = new ProductSelectionViewImpl(this, R.id.payment_product_selection_view_layout);
+        selectionView =
+            new ProductSelectionViewImpl(this, R.id.payment_product_selection_view_layout);
 
         // This activity won't work without internet, so show an error message if there is no
         // connection
@@ -126,13 +124,24 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             try {
                 /*
                  Instantiate the Session.
-                 This session has logging enabled, meaning that requests made to the server and responses received from the server will be logged.
-                 By default logging is disabled.
-                 Logging can also be enabled or disabled at a later stage by calling `session.setLoggingEnabled(Boolean)`.
+                 This session has logging enabled, meaning that requests made to the server and
+                 responses received from the server will be logged.
+                 By default, logging is disabled.
+                 Logging can also be enabled or disabled at a later stage by calling
+                 `session.setLoggingEnabled(Boolean)`.
                  Logging should be disabled in production.
-                 To ensure that - for example - logging is enabled in debug and disabled in release, you can use a build property whose value depends on the build variant of your app.
+                 To ensure that - for example - logging is enabled in debug and disabled in release,
+                 you can use a build property whose value depends on the build variant of your app.
                  */
-                session = new Session(clientSessionId, customerId, clientApiUrl, assetUrl, environmentIsProduction, Constants.APPLICATION_IDENTIFIER, BuildConfig.LOGGING_ENABLED);
+                session = SessionManager.initSession(clientSessionId,
+                    customerId,
+                    clientApiUrl,
+                    assetUrl,
+                    environmentIsProduction,
+                    Constants.APPLICATION_IDENTIFIER,
+                    BuildConfig.LOGGING_ENABLED,
+                    this
+                );
             } catch (InvalidParameterException e) {
                 Log.e(TAG, "Instantiating Session failed with: " + e.getMessage());
                 selectionView.showTechnicalErrorDialog(this);
@@ -140,16 +149,15 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             }
 
             selectionView.showLoadingIndicator();
-            session.getBasicPaymentItems(getApplicationContext(), paymentContext, groupPaymentProducts, new BasicPaymentItemsResponseListener() {
+
+            session.getBasicPaymentItems(paymentContext, new BasicPaymentItemsResponseListener() {
                 @Override
                 public void onSuccess(@NonNull BasicPaymentItems basicPaymentItems) {
-                    if (basicPaymentItems.getBasicPaymentItems() != null && !basicPaymentItems.getBasicPaymentItems().isEmpty()) {
+                    if (!basicPaymentItems.getBasicPaymentItems().isEmpty()) {
 
                         paymentItems = basicPaymentItems;
 
                         selectionView.renderDynamicContent(basicPaymentItems);
-
-                        updateLogos(basicPaymentItems.getBasicPaymentItems());
                     } else {
                         selectionView.showTechnicalErrorDialog(PaymentProductSelectionActivity.this);
                     }
@@ -157,12 +165,12 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                 }
 
                 @Override
-                public void onApiError(ErrorResponse errorResponse) {
+                public void onApiError(@NonNull ErrorResponse errorResponse) {
                     handleApiErrorOrException();
                 }
 
                 @Override
-                public void onException(Throwable throwable) {
+                public void onException(@NonNull Throwable throwable) {
                     handleApiErrorOrException();
                 }
             });
@@ -184,47 +192,18 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         merchantId = intent.getStringExtra(Constants.MERCHANT_MERCHANT_IDENTIFIER);
         merchantName = intent.getStringExtra(Constants.MERCHANT_NAME);
         assetUrl = intent.getStringExtra(Constants.MERCHANT_ASSET_URL);
-        environmentIsProduction = intent.getBooleanExtra(Constants.MERCHANT_ENVIRONMENT_IS_PRODUCTION, false);
-        paymentContext = (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
-        groupPaymentProducts = intent.getBooleanExtra(Constants.INTENT_GROUP_PAYMENTPRODUCTS, false);
+        environmentIsProduction =
+            intent.getBooleanExtra(Constants.MERCHANT_ENVIRONMENT_IS_PRODUCTION, false);
+        paymentContext =
+            (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
         shoppingCart = (ShoppingCart) intent.getSerializableExtra(Constants.INTENT_SHOPPINGCART);
     }
 
     private void initializeSavedInstanceStateData(Bundle savedInstanceState) {
-        paymentItems = (BasicPaymentItems) savedInstanceState.getSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS);
-        shoppingCart = (ShoppingCart) savedInstanceState.getSerializable(Constants.BUNDLE_SHOPPING_CART);
-        session = (Session) savedInstanceState.getSerializable(Constants.BUNDLE_GC_SESSION);
-    }
-
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//    }
-
-    private void updateLogos(List<BasicPaymentItem> basicPaymentItems) {
-        // if you want to specify the size of the logos you update, set your desired width and height
-        int newWidth = 100;
-        int newHeight = 100;
-
-        for (BasicPaymentItem paymentItem : basicPaymentItems) {
-            if(!paymentItem.getDisplayHintsList().isEmpty()) {
-                DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
-
-                if (displayHints.getLogo() != null) {
-                    Bitmap originalLogo = ((BitmapDrawable) displayHints.getLogo()).getBitmap();
-
-                    BitmapDrawable resizedLogo = this.resizedLogo(originalLogo, newWidth, newHeight);
-
-                    displayHints.setLogo(resizedLogo);
-                }
-            }
-        }
-    }
-
-    private BitmapDrawable resizedLogo(Bitmap originalLogo, int width, int height) {
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(originalLogo, width, height, true);
-
-        return new BitmapDrawable(getResources(), resizedBitmap);
+        paymentItems =
+            (BasicPaymentItems) savedInstanceState.getSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS);
+        shoppingCart =
+            (ShoppingCart) savedInstanceState.getSerializable(Constants.BUNDLE_SHOPPING_CART);
     }
 
     // The callback method for when a user selects a payment product
@@ -234,30 +213,34 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             // Reset accountOnFile to null, so its contents will not be filled in for a BasicPaymentProduct
             accountOnFile = null;
             String paymentProductId = ((BasicPaymentProduct) v.getTag()).getId();
-            session.getPaymentProduct(getApplicationContext(), paymentProductId, paymentContext, paymentProductResponseListener);
-
+            assert paymentProductId != null;
+            session.getPaymentProduct(paymentProductId,
+                paymentContext,
+                paymentProductResponseListener
+            );
         } else if (v.getTag() instanceof AccountOnFile) {
             // Store the Account on file so it can be added to the intent later on.
             accountOnFile = (AccountOnFile) v.getTag();
-            session.getPaymentProduct(getApplicationContext(), accountOnFile.getPaymentProductId(), paymentContext, paymentProductResponseListener);
+            session.getPaymentProduct(accountOnFile.getPaymentProductId(),
+                paymentContext,
+                paymentProductResponseListener
+            );
         } else {
             throw new InvalidParameterException("Tag in view is not of a valid type");
         }
     }
 
-    // Determine what view should be served next, based on whether the product has inputfields.
+    // Determine what view should be served next, based on whether the product has inputFields.
     // For some products special rules apply, which are also handled here.
     private void handlePaymentItemCallBack(PaymentItem paymentItem) {
         if (paymentItem == null) {
             selectionView.hideLoadingIndicator();
             selectionView.showTechnicalErrorDialog(this);
-
         } else if (PAYMENTPRODUCTID_GOOGLEPAY.equals(paymentItem.getId())) {
             // Google pay requires a different flow even though it has fields. The fields should
             // not be shown to the user, but they will be filled after the user has completed the
             // Google pay flow.
             startGooglePay((PaymentProduct) paymentItem);
-
         } else if (paymentItem.getPaymentProductFields().isEmpty()) {
             // For payment products that do not have fields configured other actions are required to
             // complete the payment. These actions may be a redirect to an external payment products'
@@ -265,7 +248,6 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             // Currently this app does not contain examples for these kinds of products. Instead we
             // will go to the result activity directly.
             startNextActivity(new Intent(this, PaymentResultActivity.class));
-
         } else {
             // Ask the user for its payment details in the next activity
             determineAndStartDetailInputActivity(paymentItem);
@@ -274,12 +256,14 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
     private void startGooglePay(PaymentProduct paymentProduct) {
         if (!merchantId.isEmpty() && !merchantName.isEmpty()) {
-            GooglePay googlePay = new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
+            GooglePay googlePay =
+                new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
             googlePay.start(environmentIsProduction);
         } else {
-            Toast
-                .makeText(this, "MerchantId & MerchantName cannot be empty when you want to use GooglePay", Toast.LENGTH_LONG)
-                .show();
+            Toast.makeText(this,
+                "MerchantId & MerchantName cannot be empty when you want to use GooglePay",
+                Toast.LENGTH_LONG
+            ).show();
         }
         selectionView.hideLoadingIndicator();
     }
@@ -290,13 +274,12 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         // these cases a subclass of the DetailInputActivity will be loaded that has additional
         // functionality for these specific products/methods.
         Intent detailInputActivityIntent;
-        if (((PaymentProduct) paymentItem).getPaymentMethod().equals("card")) {
+        if (Objects.equals(((PaymentProduct) paymentItem).getPaymentMethod(), "card")) {
             detailInputActivityIntent = new Intent(this, DetailInputActivityCreditCards.class);
-
         } else {
             detailInputActivityIntent = new Intent(this, DetailInputActivity.class);
-
         }
+
         detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ITEM, paymentItem);
         startNextActivity(detailInputActivityIntent);
     }
@@ -304,9 +287,10 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     private void startNextActivity(Intent detailInputActivityIntent) {
         // Add data to intent for the detail activity input
         detailInputActivityIntent.putExtra(Constants.INTENT_PAYMENT_CONTEXT, paymentContext);
-        detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ACCOUNT_ON_FILE, accountOnFile);
+        detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ACCOUNT_ON_FILE,
+            accountOnFile
+        );
         detailInputActivityIntent.putExtra(Constants.INTENT_SHOPPINGCART, shoppingCart);
-        detailInputActivityIntent.putExtra(Constants.INTENT_GC_SESSION, session);
 
         // Start the intent
         startActivity(detailInputActivityIntent);
@@ -324,36 +308,46 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             switch (resultCode) {
                 case RESULT_OK:
                     PaymentData paymentData = PaymentData.getFromIntent(data);
-
+                    assert paymentData != null;
                     String paymentDataJSONString = paymentData.toJson();
+
                     try {
                         JSONObject paymentDataJSON = new JSONObject(paymentDataJSONString);
 
-                        JSONObject paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData");
-                        JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
+                        JSONObject paymentMethodData =
+                            paymentDataJSON.getJSONObject("paymentMethodData");
+                        JSONObject tokenizationData =
+                            paymentMethodData.getJSONObject("tokenizationData");
                         String unformattedGooglePayToken = tokenizationData.getString("token");
 
                         // Token needs to be formatted when using it to create a payment with mobilePaymentMethodSpecificInput.encryptedPaymentData
-                        String formattedGooglePayToken = JSONObject.quote(unformattedGooglePayToken);
+                        String formattedGooglePayToken =
+                            JSONObject.quote(unformattedGooglePayToken);
 
                         PaymentRequest paymentRequest = new PaymentRequest(paymentProduct);
                         paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, formattedGooglePayToken);
                         paymentRequest.validate();
 
-                        session.preparePaymentRequest(paymentRequest, getApplicationContext(), new PaymentRequestPreparedListener() {
-                            @Override
-                            public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
-                                handlePreparedPaymentRequest(preparedPaymentRequest);
-                            }
+                        session.preparePaymentRequest(paymentRequest,
+                            new PaymentRequestPreparedListener() {
+                                @Override
+                                public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
+                                    handlePreparedPaymentRequest(preparedPaymentRequest);
+                                }
 
-                            @Override
-                            public void onFailure(EncryptDataException e) {
-                                Log.e(TAG, "Could not prepare Payment Request due to exception: " + e.getMessage());
-                                handleApiErrorOrException();
+                                @Override
+                                public void onFailure(EncryptDataException e) {
+                                    Log.e(TAG,
+                                        "Could not prepare Payment Request due to exception: " + e.getMessage()
+                                    );
+                                    handleApiErrorOrException();
+                                }
                             }
-                        });
+                        );
                     } catch (Exception e) {
-                        Log.e(TAG, "Could not parse malformed JSON: \"" + paymentDataJSONString + "\"");
+                        Log.e(TAG,
+                            "Could not parse malformed JSON: \"" + paymentDataJSONString + "\""
+                        );
                     }
 
                     break;
@@ -363,7 +357,9 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                     break;
                 case AutoResolveHelper.RESULT_ERROR:
                     Status status = AutoResolveHelper.getStatusFromIntent(data);
-                    Log.e(TAG, "Something went wrong whilst making a Google Pay payment; errorCode: " + status);
+                    Log.e(TAG,
+                        "Something went wrong whilst making a Google Pay payment; errorCode: " + status
+                    );
                     selectionView.hideLoadingIndicator();
                     selectionView.showTechnicalErrorDialog(this);
                     break;
@@ -375,14 +371,17 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         }
     }
 
+    /**
+     * @noinspection unused
+     */
     public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
         // Send the PreparedPaymentRequest to the merchant server, this contains a blob of encrypted values + base64encoded metadata
         //
         // Depending on the response from the merchant server, redirect to one of the following pages:
         //
         // - Successful page if the payment is done
-        // - Unsuccesful page when the payment result is unsuccessful, you must supply a paymentProductId and an errorcode which will be translated
-        // - Webview page to show an instructions page, or to go to a third party payment page
+        // - Unsuccessful page when the payment result is unsuccessful, you must supply a paymentProductId and an errorCode which will be translated
+        // - Web view page to show an instructions page, or to go to a third party payment page
         //
         // Successful and Unsuccessful results have to be redirected to PaymentResultActivity
 
@@ -391,13 +390,9 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         // When the the payment result has come back, go to the successful/unsuccessful page:
         Intent paymentResultIntent = new Intent(this, PaymentResultActivity.class);
 
-        //put shopping cart and payment request inside the intent
+        // put shopping cart and payment request inside the intent
         paymentResultIntent.putExtra(Constants.INTENT_SHOPPINGCART, shoppingCart);
         paymentResultIntent.putExtra(Constants.INTENT_PAYMENT_CONTEXT, paymentContext);
-
-        // Add errormessage if there was an error
-        //String errorCode = "errorCode";
-        //paymentResultIntent.putExtra(Constants.INTENT_ERRORMESSAGE, null);
 
         startActivity(paymentResultIntent);
     }
@@ -406,7 +401,6 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS, paymentItems);
         outState.putSerializable(Constants.BUNDLE_SHOPPING_CART, shoppingCart);
-        outState.putSerializable(Constants.BUNDLE_GC_SESSION, session);
 
         super.onSaveInstanceState(outState);
     }

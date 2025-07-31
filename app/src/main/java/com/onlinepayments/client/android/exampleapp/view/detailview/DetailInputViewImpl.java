@@ -38,7 +38,7 @@ public class DetailInputViewImpl implements DetailInputView {
 
     private ProgressDialog progressDialog;
 
-    public DetailInputViewImpl (Activity activity, @IdRes int id) {
+    public DetailInputViewImpl(Activity activity, @IdRes int id) {
         rootView = activity.findViewById(id);
 
         renderInputFieldsLayout = rootView.findViewById(R.id.render_input_fields_layout);
@@ -47,25 +47,33 @@ public class DetailInputViewImpl implements DetailInputView {
     }
 
     @Override
-    public void renderDynamicContent(InputDataPersister inputDataPersister,
-                                     PaymentContext paymentContext,
-                                     InputValidationPersister inputValidationPersister) {
+    public void renderDynamicContent(
+        InputDataPersister inputDataPersister,
+        PaymentContext paymentContext,
+        InputValidationPersister inputValidationPersister
+    ) {
         fieldRenderer.renderPaymentInputFields(inputDataPersister, paymentContext);
-        renderValidationHelper.renderValidationMessages(inputValidationPersister, inputDataPersister.getPaymentItem());
+        renderValidationHelper.renderValidationMessages(
+            inputValidationPersister,
+            inputDataPersister.getPaymentItem()
+        );
     }
 
     @Override
     public void renderRememberMeCheckBox(boolean isChecked) {
         ViewGroup rememberLayout = rootView.findViewById(R.id.rememberLayout);
 
-        // Remove the rememberme tooltip popup that is potentially already in the view
+        // Remove the rememberMe tooltip popup that is potentially already in the view
         View v = rememberLayout.findViewWithTag("rememberMe");
         rememberLayout.removeView(v);
 
         rememberLayout.setVisibility(View.VISIBLE);
 
         RenderTooltip renderTooltip = new RenderTooltip();
-        renderTooltip.renderRememberMeTooltip(rootView.getContext(), rootView.findViewById(R.id.rememberLayout));
+        renderTooltip.renderRememberMeTooltip(
+            rootView.getContext(),
+            rootView.findViewById(R.id.rememberLayout)
+        );
     }
 
     @Override
@@ -92,21 +100,27 @@ public class DetailInputViewImpl implements DetailInputView {
     }
 
     @Override
-    public void renderValidationMessage(ValidationErrorMessage validationResult, PaymentItem paymentItem) {
+    public void renderValidationMessage(
+        ValidationErrorMessage validationResult,
+        PaymentItem paymentItem
+    ) {
         renderValidationHelper.renderValidationMessage(validationResult, paymentItem);
     }
 
     @Override
-    public void renderValidationMessages(InputValidationPersister inputValidationPersister, PaymentItem paymentItem) {
+    public void renderValidationMessages(
+        InputValidationPersister inputValidationPersister,
+        PaymentItem paymentItem
+    ) {
         renderValidationHelper.renderValidationMessages(inputValidationPersister, paymentItem);
     }
 
     @Override
     public void hideTooltipAndErrorViews(InputValidationPersister inputValidationPersister) {
-        // Hide all dynamic rendered tooltiptexts
+        // Hide all dynamic rendered toolTipTexts
         fieldRenderer.hideTooltipTexts(renderInputFieldsLayout);
 
-        // Hide the hardcoded rendered tooltiptexts
+        // Hide the hardcoded rendered toolTipTexts
         fieldRenderer.hideTooltipTexts(rootView.findViewById(R.id.rememberLayoutParent));
 
         // Hide all
@@ -122,7 +136,10 @@ public class DetailInputViewImpl implements DetailInputView {
 
     @Override
     public void hideLoadDialog() {
-        progressDialog.hide();
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
     }
 
     @Override

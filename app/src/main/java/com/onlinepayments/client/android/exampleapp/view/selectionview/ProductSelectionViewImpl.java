@@ -31,7 +31,7 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     private final ViewGroup renderAccountOnFilesLayout;
     private final ViewGroup renderProductsLayout;
 
-    // Renderhelpers for the dynamic content
+    // RenderHelpers for the dynamic content
     private final RenderPaymentItem paymentItemRenderer;
     private final RenderAccountOnFile accountOnFileRenderer;
 
@@ -52,7 +52,7 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
 
     @Override
     public void renderDynamicContent(BasicPaymentItems paymentItems) {
-        // Render all basic paymentitems and accounts on file
+        // Render all basic paymentItems and accounts on file
         for (BasicPaymentItem basicPaymentItem : paymentItems.getBasicPaymentItems()) {
             paymentItemRenderer.renderPaymentItem(basicPaymentItem, renderProductsLayout);
         }
@@ -66,8 +66,13 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
 
             // Render all accountsOnFile
             for (AccountOnFile accountOnFile : paymentItems.getAccountsOnFile()) {
-                BasicPaymentItem correspondingPaymentItem = paymentItems.getBasicPaymentItemById(accountOnFile.getPaymentProductId());
-                accountOnFileRenderer.renderAccountOnFile(accountOnFile, correspondingPaymentItem, renderAccountOnFilesLayout);
+                BasicPaymentItem correspondingPaymentItem =
+                    paymentItems.getBasicPaymentItemById(accountOnFile.getPaymentProductId());
+                accountOnFileRenderer.renderAccountOnFile(
+                    accountOnFile,
+                    correspondingPaymentItem,
+                    renderAccountOnFilesLayout
+                );
             }
         }
     }
@@ -90,40 +95,42 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void showTechnicalErrorDialog(OnClickListener listener) {
         Context context = rootView.getContext();
-        alertDialog = DialogUtil.showAlertDialog(
-                context,
-                R.string.errors_title,
-                R.string.errors_technicalProblem,
-                R.string.app_errors_general_button,
-                null
+        alertDialog = DialogUtil.showAlertDialog(context,
+            R.string.errors_title,
+            R.string.errors_technicalProblem,
+            R.string.app_errors_general_button,
+            null
         );
     }
 
     @Override
     public void showNoInternetDialog(OnClickListener listener) {
         Context context = rootView.getContext();
-        alertDialog = DialogUtil.showAlertDialog(
-                context,
-                R.string.app_errors_noInternetConnection_title,
-                R.string.app_errors_noInternetConnection_bodytext,
-                R.string.app_errors_general_button,
-                listener
+        alertDialog = DialogUtil.showAlertDialog(context,
+            R.string.app_errors_noInternetConnection_title,
+            R.string.app_errors_noInternetConnection_bodytext,
+            R.string.app_errors_general_button,
+            listener
         );
     }
 
     @Override
-    public void showSpendingLimitExceededErrorDialog(OnClickListener positiveListener, OnClickListener negativeListener) {
+    public void showSpendingLimitExceededErrorDialog(
+        OnClickListener positiveListener,
+        OnClickListener negativeListener
+    ) {
         Context c = rootView.getContext();
         String title = c.getString(R.string.app_errors_spendingLimitExceeded_title);
         String msg = c.getString(R.string.app_errors_spendingLimitExceeded_bodyText);
-        String posButton = c.getString(R.string.app_errors_spendingLimitExceeded_button_changeOrder);
-        String negButton = c.getString(R.string.app_errors_spendingLimitExceeded_button_tryOtherMethod);
-        alertDialog = new AlertDialog.Builder(c)
-                .setTitle(title)
-                .setMessage(msg)
-                .setPositiveButton(posButton, positiveListener)
-                .setNegativeButton(negButton, negativeListener)
-                .create();
+        String posButton =
+            c.getString(R.string.app_errors_spendingLimitExceeded_button_changeOrder);
+        String negButton =
+            c.getString(R.string.app_errors_spendingLimitExceeded_button_tryOtherMethod);
+        alertDialog = new AlertDialog.Builder(c).setTitle(title)
+            .setMessage(msg)
+            .setPositiveButton(posButton, positiveListener)
+            .setNegativeButton(negButton, negativeListener)
+            .create();
         alertDialog.show();
     }
 

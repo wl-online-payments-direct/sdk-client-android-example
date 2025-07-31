@@ -3,15 +3,15 @@ package com.onlinepayments.client.android.exampleapp.util;
 import android.app.Activity;
 import android.util.Log;
 
-import com.onlinepayments.client.android.exampleapp.configuration.Constants;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.specificdata.PaymentProduct320SpecificData;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
+import com.onlinepayments.client.android.exampleapp.configuration.Constants;
+import com.onlinepayments.sdk.client.android.model.PaymentContext;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.model.paymentproduct.specificdata.PaymentProduct320SpecificData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,40 +19,52 @@ import org.json.JSONObject;
 
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Code required to successfully complete a Google Pay payment
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
+ * </p>
  */
 public class GooglePay {
 
     private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 42;
     private static final String TAG = GooglePay.class.getName();
 
-    private Activity activity;
-    private PaymentContext paymentContext;
-    private PaymentProduct paymentProduct;
-    private String merchantId;
-    private String merchantName;
+    private final Activity activity;
+    private final PaymentContext paymentContext;
+    private final PaymentProduct paymentProduct;
+    private final String merchantId;
+    private final String merchantName;
 
-    public GooglePay(Activity activity, PaymentContext paymentContext, PaymentProduct paymentProduct,
-                     String merchantId, String merchantName) {
+    public GooglePay(
+        Activity activity,
+        PaymentContext paymentContext,
+        PaymentProduct paymentProduct,
+        String merchantId,
+        String merchantName
+    ) {
 
         if (activity == null) {
-            throw new InvalidParameterException("Could not create GooglePay. Activity may not be null.");
+            throw new InvalidParameterException(
+                "Could not create GooglePay. Activity may not be null.");
         }
         if (paymentContext == null) {
-            throw new InvalidParameterException("Could not create GooglePay. PaymentContext may not be null.");
+            throw new InvalidParameterException(
+                "Could not create GooglePay. PaymentContext may not be null.");
         }
         if (paymentProduct == null || !Constants.PAYMENTPRODUCTID_GOOGLEPAY.equals(paymentProduct.getId())) {
-            throw new InvalidParameterException("Could not create GooglePay. PaymentProduct must be set and must be the Google Pay payment product.");
+            throw new InvalidParameterException(
+                "Could not create GooglePay. PaymentProduct must be set and must be the Google Pay payment product.");
         }
         if (merchantId == null || merchantId.isEmpty()) {
-            throw new InvalidParameterException("Could not create GooglePay. MerchantId must be provided.");
+            throw new InvalidParameterException(
+                "Could not create GooglePay. MerchantId must be provided.");
         }
         if (merchantName == null || merchantName.isEmpty()) {
-            throw new InvalidParameterException("Could not create GooglePay. MerchantName must be provided.");
+            throw new InvalidParameterException(
+                "Could not create GooglePay. MerchantName must be provided.");
         }
 
         this.activity = activity;
@@ -69,34 +81,42 @@ public class GooglePay {
      */
     public void start(boolean isEnvironmentProduction) {
 
-        PaymentsClient mPaymentsClient =
-                Wallet.getPaymentsClient(
-                        activity,
-                        new Wallet.WalletOptions.Builder()
-                                .setEnvironment(isEnvironmentProduction ? WalletConstants.ENVIRONMENT_PRODUCTION : WalletConstants.ENVIRONMENT_TEST)
-                                .build());
+        PaymentsClient mPaymentsClient = Wallet.getPaymentsClient(activity,
+            new Wallet.WalletOptions.Builder().setEnvironment(isEnvironmentProduction
+                ? WalletConstants.ENVIRONMENT_PRODUCTION
+                : WalletConstants.ENVIRONMENT_TEST).build()
+        );
 
-        JSONObject paymentDataRequestJson = createGooglePayRequest(paymentContext, getNetworks(), getGatewayId(), merchantId, merchantName);
+        JSONObject paymentDataRequestJson = createGooglePayRequest(paymentContext,
+            getNetworks(),
+            getGatewayId(),
+            merchantId,
+            merchantName
+        );
 
-        PaymentDataRequest request =
-                PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
-        if (request != null) {
-            AutoResolveHelper.resolveTask(
-                    mPaymentsClient.loadPaymentData(request), activity, LOAD_PAYMENT_DATA_REQUEST_CODE);
-        }
+        PaymentDataRequest request = PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
+        AutoResolveHelper.resolveTask(mPaymentsClient.loadPaymentData(request),
+            activity,
+            LOAD_PAYMENT_DATA_REQUEST_CODE
+        );
     }
-
 
     /**
      * This method assembles the Google Pay payment Request.
      *
-     * @param paymentContext,   payment-related data
-     * @param networks,   Determines the card schemes that the user can use for the payment. Use
-     *          the list that is provided in the Google Pay payment product response.
-     * @param merchantId,   Your Connect merchant ID
+     * @param paymentContext, payment-related data
+     * @param networks,       Determines the card schemes that the user can use for the payment. Use
+     *                        the list that is provided in the Google Pay payment product response.
+     * @param merchantId,     Your Connect merchant ID
      * @param merchantName,   Your company name in Human Readable form. May be shown to the user.
      */
-    private JSONObject createGooglePayRequest(PaymentContext paymentContext, List<String> networks, String gatewayId, String merchantId, String merchantName) {
+    private JSONObject createGooglePayRequest(
+        PaymentContext paymentContext,
+        List<String> networks,
+        String gatewayId,
+        String merchantId,
+        String merchantName
+    ) {
 
         JSONObject paymentRequest = new JSONObject();
         // Assemble payment request
@@ -106,8 +126,7 @@ public class GooglePay {
             paymentRequest.put("apiVersionMinor", 0);
 
             // Insert merchant info (only for full payment requests)
-            JSONObject merchantInfo = new JSONObject()
-                    .put("merchantName", merchantName);
+            JSONObject merchantInfo = new JSONObject().put("merchantName", merchantName);
             paymentRequest.put("merchantInfo", merchantInfo);
 
             JSONArray allowedPaymentMethods = new JSONArray();
@@ -116,12 +135,12 @@ public class GooglePay {
             // Insert tokenization specification (only for full payment requests)
             JSONObject tokenizationSpecification = new JSONObject();
             tokenizationSpecification.put("type", "PAYMENT_GATEWAY");
-            tokenizationSpecification.put(
-                    "parameters",
-                    new JSONObject()
-                            .put("gateway", gatewayId)
-                            .put("gatewayMerchantId", merchantId));
-            allowedPaymentMethodsContent.put("tokenizationSpecification", tokenizationSpecification);
+            tokenizationSpecification.put("parameters",
+                new JSONObject().put("gateway", gatewayId).put("gatewayMerchantId", merchantId)
+            );
+            allowedPaymentMethodsContent.put("tokenizationSpecification",
+                tokenizationSpecification
+            );
 
             allowedPaymentMethods.put(allowedPaymentMethodsContent);
             paymentRequest.put("allowedPaymentMethods", allowedPaymentMethods);
@@ -129,8 +148,13 @@ public class GooglePay {
             // Insert transaction info (only for full payment requests)
             JSONObject transactionInfo = new JSONObject();
             transactionInfo.put("totalPriceStatus", "FINAL");
-            transactionInfo.put("totalPrice", paymentContext.getAmountOfMoney().getAmount().toString());
-            transactionInfo.put("currencyCode", paymentContext.getAmountOfMoney().getCurrencyCode());
+            transactionInfo.put("totalPrice",
+                Objects.requireNonNull(Objects.requireNonNull(paymentContext.getAmountOfMoney())
+                    .getAmount()).toString()
+            );
+            transactionInfo.put("currencyCode",
+                paymentContext.getAmountOfMoney().getCurrencyCode()
+            );
             paymentRequest.put("transactionInfo", transactionInfo);
         } catch (JSONException e) {
             Log.e(TAG, "Exception occurred while creating JSON object: " + e);
@@ -143,26 +167,21 @@ public class GooglePay {
 
         JSONArray cardPaymentMethod = new JSONArray();
         JSONArray allowedNetworks = new JSONArray();
-        JSONArray allowedAuthMethods = new JSONArray()
-                .put("PAN_ONLY")
-                .put("CRYPTOGRAM_3DS");
+        JSONArray allowedAuthMethods = new JSONArray().put("PAN_ONLY").put("CRYPTOGRAM_3DS");
 
         // Convert networks and authMethods to JSON objects
-        for( String s : networks) {
+        for (String s : networks) {
             allowedNetworks.put(s);
         }
 
         JSONObject parameters = new JSONObject();
         try {
             parameters.put("type", "CARD");
-            parameters.put(
-                    "parameters",
-                    new JSONObject()
-                            .put("allowedAuthMethods", allowedAuthMethods)
-                            .put("allowedCardNetworks", allowedNetworks)
+            parameters.put("parameters",
+                new JSONObject().put("allowedAuthMethods", allowedAuthMethods)
+                    .put("allowedCardNetworks", allowedNetworks)
             );
             cardPaymentMethod.put(parameters);
-
         } catch (JSONException e) {
             Log.e(TAG, "Exception occurred while creating JSON object: " + e);
         }
@@ -172,9 +191,11 @@ public class GooglePay {
 
     private List<String> getNetworks() {
 
-        PaymentProduct320SpecificData paymentProductSpecificData = paymentProduct.getPaymentProduct320SpecificData();
+        PaymentProduct320SpecificData paymentProductSpecificData =
+            paymentProduct.getPaymentProduct320SpecificData();
 
-        List<String> networks = paymentProductSpecificData != null ? paymentProductSpecificData.getNetworks() : null;
+        List<String> networks =
+            paymentProductSpecificData != null ? paymentProductSpecificData.getNetworks() : null;
 
         if (networks != null && !networks.isEmpty()) {
             return networks;
@@ -185,9 +206,11 @@ public class GooglePay {
 
     private String getGatewayId() {
 
-        PaymentProduct320SpecificData paymentProductSpecificData = paymentProduct.getPaymentProduct320SpecificData();
+        PaymentProduct320SpecificData paymentProductSpecificData =
+            paymentProduct.getPaymentProduct320SpecificData();
 
-        String gatewayId = paymentProductSpecificData != null ? paymentProductSpecificData.getGateway() : null;
+        String gatewayId =
+            paymentProductSpecificData != null ? paymentProductSpecificData.getGateway() : null;
 
         if (gatewayId != null && !gatewayId.isEmpty()) {
             return gatewayId;

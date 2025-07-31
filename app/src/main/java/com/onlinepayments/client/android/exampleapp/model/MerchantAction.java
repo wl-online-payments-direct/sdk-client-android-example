@@ -6,8 +6,9 @@ import java.util.List;
 
 /**
  * Pojo that contains MerchantAction information
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
+ * </p>
  */
 public class MerchantAction {
 

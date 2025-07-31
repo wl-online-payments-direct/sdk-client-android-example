@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.model.SessionDetails;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -31,12 +32,25 @@ public class ParseJsonDialog extends Dialog {
         jsonParsedListener = listener;
     }
 
-    public ParseJsonDialog(@NonNull JsonParsedListener listener, @NonNull Context context, int themeResId) {
+    /**
+     * @noinspection unused
+     */
+    public ParseJsonDialog(
+        @NonNull JsonParsedListener listener, @NonNull Context context, int themeResId
+    ) {
         super(context, themeResId);
         jsonParsedListener = listener;
     }
 
-    protected ParseJsonDialog(@NonNull JsonParsedListener listener, @NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
+    /**
+     * @noinspection unused
+     */
+    protected ParseJsonDialog(
+        @NonNull JsonParsedListener listener,
+        @NonNull Context context,
+        boolean cancelable,
+        @Nullable OnCancelListener cancelListener
+    ) {
         super(context, cancelable, cancelListener);
         jsonParsedListener = listener;
     }
@@ -50,12 +64,14 @@ public class ParseJsonDialog extends Dialog {
         Button buttonDismiss = findViewById(R.id.dismiss_btn);
         EditText editTextJson = findViewById(R.id.edit_json);
 
-        buttonDismiss.setOnClickListener(v -> {
-            dismiss();
-        });
+        buttonDismiss.setOnClickListener(v -> dismiss());
         buttonParseJson.setOnClickListener(v -> {
             try {
                 String json = editTextJson.getText().toString();
+                if (json.isEmpty()) {
+                    return;
+                }
+
                 SessionDetails sessionDetails = new Gson().fromJson(json, SessionDetails.class);
                 jsonParsedListener.onJsonParsed(sessionDetails);
 
@@ -63,13 +79,12 @@ public class ParseJsonDialog extends Dialog {
                     dismiss();
                 } else {
                     String errorText =
-                            "Not all values were parsed. Missing values:\n" +
-                                    StringUtils.join(sessionDetails.getMissingValues());
+                        "Not all values were parsed. Missing values:\n" + StringUtils.join(
+                            sessionDetails.getMissingValues());
                     setErrorTextView(errorText);
                 }
-
             } catch (Exception ex) {
-                Log.d("ParseJsonDialog", "Error Parsing: " + ex.toString());
+                Log.d("ParseJsonDialog", "Error Parsing: " + ex);
 
                 setErrorTextView("Error parsing JSON:\n" + getCleanMessage(ex));
             }
@@ -80,7 +95,7 @@ public class ParseJsonDialog extends Dialog {
         TextView errorTextView = findViewById(R.id.text_parse_json_errors);
 
         int visibility;
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             visibility = View.GONE;
         } else {
             visibility = View.VISIBLE;
@@ -88,7 +103,6 @@ public class ParseJsonDialog extends Dialog {
 
         errorTextView.setText(text);
         errorTextView.setVisibility(visibility);
-
     }
 
     private String getCleanMessage(Exception exception) {

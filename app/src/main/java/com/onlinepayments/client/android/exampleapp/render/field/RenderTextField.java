@@ -21,125 +21,134 @@ import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleLeng
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
-
 /**
  * This class handles all rendering of the TextField field
- *
  * Copyright 2020 Global Collect Services B.V
  */
 public class RenderTextField implements RenderInputFieldInterface {
 
-	@Override
-	public View renderField(PaymentProductField field, InputDataPersister inputDataPersister,
-							ViewGroup rowView, PaymentContext paymentContext) {
+    @Override
+    public View renderField(
+        PaymentProductField field,
+        InputDataPersister inputDataPersister,
+        ViewGroup rowView,
+        PaymentContext paymentContext
+    ) {
 
-		if (field == null) {
-			throw new InvalidParameterException("Error rendering textfield, field may not be null");
-		}
-		if (rowView == null) {
-			throw new InvalidParameterException("Error rendering textfield, rowView may not be null");
-		}
-		if (inputDataPersister == null) {
-			throw new InvalidParameterException("Error rendering textfield, inputDataPersister may not be null");
-		}
+        if (field == null) {
+            throw new InvalidParameterException("Error rendering textField, field may not be null");
+        }
+        if (rowView == null) {
+            throw new InvalidParameterException("Error rendering textField, rowView may not be null");
+        }
+        if (inputDataPersister == null) {
+            throw new InvalidParameterException(
+                "Error rendering textField, inputDataPersister may not be null");
+        }
 
-		AccountOnFile accountOnFile = inputDataPersister.getAccountOnFile();
+        AccountOnFile accountOnFile = inputDataPersister.getAccountOnFile();
 
-		// Create new EditText and set its style, restrictions, mask and keyboardtype
-		EditText editText = new EditText(rowView.getContext());
-		editText.setTextAppearance(rowView.getContext(), R.style.TextField);
+        // Create new EditText and set its style, restrictions, mask and keyboardType
+        EditText editText = new EditText(rowView.getContext());
+        editText.setTextAppearance(rowView.getContext(), R.style.TextField);
 
-		for (AbstractValidationRule rule: field.getDataRestrictions().getValidationRules()) {
-			if (rule instanceof ValidationRuleLength) {
-				// Set maxLength for field
-				Integer maxLength = ((ValidationRuleLength) rule).getMaxLength();
-				if (maxLength > 0) {
-					editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
-					editText.setEms(maxLength);
-				}
-			}
-		}
+        for (AbstractValidationRule rule : field.getDataRestrictions().getValidationRules()) {
+            if (rule instanceof ValidationRuleLength) {
+                // Set maxLength for field
+                int maxLength = ((ValidationRuleLength) rule).getMaxLength();
+                if (maxLength > 0) {
+                    editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
+                    editText.setEms(maxLength);
+                }
+            }
+        }
 
-		// Set placeholder for field
-		editText.setHint(field.getDisplayHints().getPlaceholderLabel());
+        // Set placeholder for field
+        editText.setHint(field.getDisplayHints().getPlaceholderLabel());
 
-		// Set correct inputType type
-		switch (field.getDisplayHints().getPreferredInputType()) {
-			case INTEGER_KEYBOARD:
-				editText.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-				break;
-			case STRING_KEYBOARD:
-				editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
-				break;
-			case PHONE_NUMBER_KEYBOARD:
-				editText.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
-				break;
-			case EMAIL_ADDRESS_KEYBOARD:
-				editText.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-				break;
-			case DATE_PICKER:
-				editText.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
-			default:
-				editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
-				break;
-		}
+        // Set correct inputType type
+        switch (Objects.requireNonNull(field.getDisplayHints().getPreferredInputType())) {
+            case INTEGER_KEYBOARD:
+                editText.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                break;
+            case STRING_KEYBOARD:
+                editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+                break;
+            case PHONE_NUMBER_KEYBOARD:
+                editText.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+                break;
+            case EMAIL_ADDRESS_KEYBOARD:
+                editText.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                break;
+            case DATE_PICKER:
+                editText.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
+            default:
+                editText.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+                break;
+        }
 
-		// Check if this edittext should be obfuscated
-		if (field.getDisplayHints().isObfuscate()) {
-			editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-		}
+        // Check if this edittext should be obfuscated
+        if (Boolean.TRUE.equals(field.getDisplayHints().getObfuscate())) {
+            editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+        }
 
-		// Add mask functionality when a mask is set
-		String mask = field.getDisplayHints().getMask();
-		boolean addMasking = mask != null;
+        // Add mask functionality when a mask is set
+        String mask = field.getDisplayHints().getMask();
+        boolean addMasking = mask != null;
 
-		if (mask != null ) {
-			Integer maskLength = mask.replace("{", "").replace("}", "").length();
-			editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maskLength)});
-		}
+        if (mask != null) {
+            int maskLength = mask.replace("{", "").replace("}", "").length();
+            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maskLength)});
+        }
 
-		// Set values from account on file
-		if (accountOnFile != null) {
-			for (AccountOnFileAttribute attribute : accountOnFile.getAccountOnFileAttributes()) {
-				if (attribute.getKey().equals(field.getId())) {
-					if(field.getType() == PaymentProductField.Type.EXPIRYDATE && addMasking) {
-						String maskedValue = field.applyMask(attribute.getValue());
-						editText.setText(maskedValue);
-					} else if (addMasking) {
-						String maskedValue = accountOnFile.getMaskedValue(attribute.getKey(), mask);
-						editText.setText(maskedValue);
-					} else {
-						editText.setText(attribute.getValue());
-					}
+        // Set values from account on file
+        if (accountOnFile != null) {
+            for (AccountOnFileAttribute attribute : accountOnFile.getAttributes()) {
+                if (attribute.getKey().equals(field.getId())) {
+                    if (field.getType() == PaymentProductField.Type.EXPIRYDATE && addMasking) {
+                        String maskedValue = field.applyMask(attribute.getValue());
+                        editText.setText(maskedValue);
+                    } else if (addMasking) {
+                        String maskedValue = accountOnFile.getMaskedValue(attribute.getKey(), mask);
+                        editText.setText(maskedValue);
+                    } else {
+                        editText.setText(attribute.getValue());
+                    }
 
-					if (!attribute.isEditingAllowed()) {
-						editText.setEnabled(false);
-					}
-				}
-			}
-			// Do not add text changed watcher on credit card number field if it has account on file, a custom watcher will be set in DetailInputViewCreditCardImpl
-			if(!Objects.equals(field.getId(), CREDIT_CARD_NUMBER_FIELD_ID)) {
-				this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
-			}
-		} else {
-			this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
-		}
+                    if (!attribute.isEditingAllowed()) {
+                        editText.setEnabled(false);
+                    }
+                }
+            }
+            // Do not add text changed watcher on credit card number field if it has account on file, a custom watcher will be set in DetailInputViewCreditCardImpl
+            if (!Objects.equals(field.getId(), CREDIT_CARD_NUMBER_FIELD_ID)) {
+                this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
+            }
+        } else {
+            this.setTextChangedListener(inputDataPersister, field, editText, addMasking);
+        }
 
-		// get input information from inputDataPersister
-		String paymentProductValue = inputDataPersister.getValue(field.getId());
-		if(paymentProductValue != null){
-			editText.setText(paymentProductValue);
-		}
+        // get input information from inputDataPersister
+        String paymentProductValue = inputDataPersister.getValue(field.getId());
+        if (paymentProductValue != null) {
+            editText.setText(paymentProductValue);
+        }
 
-		// Add it to parentView
-		rowView.addView(editText);
+        // Add it to parentView
+        rowView.addView(editText);
 
-		return editText;
-	}
+        return editText;
+    }
 
-	private void setTextChangedListener(InputDataPersister inputDataPersister, PaymentProductField field, EditText editText, boolean addMasking) {
-		// Add OnTextChanged watcher for input field
-		FieldInputTextWatcher fieldInputTextWatcher = new FieldInputTextWatcher(inputDataPersister, field.getId(), editText, addMasking);
-		editText.addTextChangedListener(fieldInputTextWatcher);
-	}
+    private void setTextChangedListener(
+        InputDataPersister inputDataPersister,
+        PaymentProductField field,
+        EditText editText,
+        boolean addMasking
+    ) {
+        // Add OnTextChanged watcher for input field
+        FieldInputTextWatcher fieldInputTextWatcher =
+            new FieldInputTextWatcher(inputDataPersister, field.getId(), editText, addMasking);
+        editText.addTextChangedListener(fieldInputTextWatcher);
+    }
 }

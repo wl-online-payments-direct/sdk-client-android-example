@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "com.onlinepayments.client.android.exampleapp"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
@@ -47,17 +47,17 @@ android {
 }
 
 dependencies {
-    implementation 'com.worldline-solutions:sdk-client-android:3.0.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.worldline-solutions:sdk-client-android:4.1.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.code.gson:gson:2.12.1'
 
     // The following dependency will be removed in the future, so its version can be ignored.
     //noinspection GradleDependency
     implementation 'org.apache.commons:commons-lang3:3.13.0'
 
     // Google pay
-    implementation 'com.google.android.gms:play-services-wallet:19.3.0'
+    implementation 'com.google.android.gms:play-services-wallet:19.4.0'
 
     // Allow Multidex
     implementation 'androidx.multidex:multidex:2.0.1'

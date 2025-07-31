@@ -2,7 +2,8 @@ package com.onlinepayments.client.android.exampleapp.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
+
+import java.util.Objects;
 
 public class ValidationEditText extends androidx.appcompat.widget.AppCompatEditText {
 
@@ -16,13 +17,15 @@ public class ValidationEditText extends androidx.appcompat.widget.AppCompatEditT
         createValidation();
     }
 
-    public ValidationEditText(Context context, AttributeSet attribute_set, int def_style_attribute) {
+    public ValidationEditText(
+        Context context, AttributeSet attribute_set, int def_style_attribute
+    ) {
         super(context, attribute_set, def_style_attribute);
         createValidation();
     }
 
     public String getValue() {
-        return getText().toString();
+        return Objects.requireNonNull(getText()).toString();
     }
 
     public boolean isValid() {
@@ -32,15 +35,12 @@ public class ValidationEditText extends androidx.appcompat.widget.AppCompatEditT
     }
 
     private void createValidation() {
-        setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    return;
-                }
-
-                validate();
+        setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                return;
             }
+
+            validate();
         });
     }
 

@@ -11,6 +11,7 @@ import java.util.List;
  * Pojo that contains session details
  * <p>
  * Copyright 2017 Global Collect Services B.V
+ * </p>
  */
 public class SessionDetails {
 
@@ -36,11 +37,18 @@ public class SessionDetails {
 
     public List<String> getMissingValues() {
         List<String> missingValues = new ArrayList<>();
-        if (assetUrl == null) missingValues.add("assetUrl");
-        if (clientApiUrl == null) missingValues.add("clientApiUrl");
-        if (clientSessionId == null) missingValues.add("clientSessionId");
-        if (customerId == null) missingValues.add("customerId");
+        if (assetUrl == null) {
+            missingValues.add("assetUrl");
+        }
+        if (clientApiUrl == null) {
+            missingValues.add("clientApiUrl");
+        }
+        if (clientSessionId == null) {
+            missingValues.add("clientSessionId");
+        }
+        if (customerId == null) {
+            missingValues.add("customerId");
+        }
         return missingValues;
     }
-
 }

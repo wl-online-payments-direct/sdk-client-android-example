@@ -15,30 +15,40 @@ import java.security.InvalidParameterException;
 
 /**
  * This class handles all rendering of the TextField field
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
+ * </p>
  */
 public class RenderBoolean implements RenderInputFieldInterface {
 
     @Override
-    public View renderField(PaymentProductField field, InputDataPersister inputDataPersister,
-                            ViewGroup rowView, PaymentContext paymentContext) {
+    public View renderField(
+        PaymentProductField field,
+        InputDataPersister inputDataPersister,
+        ViewGroup rowView,
+        PaymentContext paymentContext
+    ) {
 
         if (field == null) {
             throw new InvalidParameterException("Error rendering checkbox, field may not be null");
         }
+
         if (rowView == null) {
             throw new InvalidParameterException("Error rendering checkbox, rowView may not be null");
         }
+
         if (inputDataPersister == null) {
-            throw new InvalidParameterException("Error rendering checkbox, inputDataPersister may not be null");
+            throw new InvalidParameterException(
+                "Error rendering checkbox, inputDataPersister may not be null");
         }
 
         // Create a new checkbox
         CheckBox checkBox = new CheckBox(rowView.getContext());
         checkBox.setGravity(Gravity.CENTER_VERTICAL);
 
-        checkBox.setOnCheckedChangeListener(createOnCheckedChangedListener(inputDataPersister, field.getId()));
+        checkBox.setOnCheckedChangeListener(createOnCheckedChangedListener(inputDataPersister,
+            field.getId()
+        ));
 
         // Get input information from inputDataPersister
         String value = inputDataPersister.getValue(field.getId());
@@ -55,7 +65,9 @@ public class RenderBoolean implements RenderInputFieldInterface {
         return checkBox;
     }
 
-    private OnCheckedChangeListener createOnCheckedChangedListener(final InputDataPersister inputDataPersister, final String fieldId) {
+    private OnCheckedChangeListener createOnCheckedChangedListener(
+        final InputDataPersister inputDataPersister, final String fieldId
+    ) {
         return new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

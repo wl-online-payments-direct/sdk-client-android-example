@@ -6,14 +6,13 @@ import java.util.Locale;
 
 /**
  * Helper for getting the required amount in the correct currency
- *
+ * <p>
  * Copyright 2020 Global Collect Services B.V
- *
+ * </p>
  */
 public final class CurrencyUtil {
 
-    private CurrencyUtil(){
-
+    private CurrencyUtil() {
     }
 
     public static String formatAmount(long amount, String countryCode, String currencyCode) {
@@ -41,7 +40,7 @@ public final class CurrencyUtil {
             // Make formatted amount
             NumberFormat formatter = NumberFormat.getCurrencyInstance(localeFromCountryCode);
             formatter.setCurrency(currencyFromCurrencyCode);
-            double doublePayment = ((double)amount) / 100;
+            double doublePayment = ((double) amount) / 100;
 
             formatter.setMinimumFractionDigits(2);
             formatter.setMaximumFractionDigits(2);
