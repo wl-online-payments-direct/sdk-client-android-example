@@ -9,17 +9,16 @@ java {
 }
 
 android {
-    namespace 'com.onlinepayments.client.android.exampleapp'
-
-    compileSdk 34
+    namespace = 'com.onlinepayments.client.android.exampleapp'
 
     defaultConfig {
-        applicationId "com.onlinepayments.client.android.exampleapp"
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 1
-        versionName "1.0"
-        multiDexEnabled true
+        applicationId = "com.onlinepayments.client.android.exampleapp"
+        minSdkVersion = 23
+        compileSdk = 35
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+        multiDexEnabled = true
     }
 
     buildFeatures {
@@ -27,8 +26,8 @@ android {
     }
 
     lint {
-        abortOnError false
-        lintConfig file('lint.xml')
+        abortOnError = false
+        lintConfig = file('lint.xml')
     }
 
     buildTypes {
@@ -47,26 +46,26 @@ android {
 }
 
 dependencies {
-    implementation 'com.worldline-solutions:sdk-client-android:4.1.0'
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'com.google.code.gson:gson:2.12.1'
+    implementation('com.worldline-solutions:sdk-client-android:4.2.0')
+    implementation('androidx.appcompat:appcompat:1.7.1')
+    implementation('com.google.android.material:material:1.13.0')
+    implementation('com.google.code.gson:gson:2.13.2')
 
     // The following dependency will be removed in the future, so its version can be ignored.
     //noinspection GradleDependency
-    implementation 'org.apache.commons:commons-lang3:3.13.0'
+    implementation('org.apache.commons:commons-lang3:3.19.0')
 
     // Google pay
-    implementation 'com.google.android.gms:play-services-wallet:19.4.0'
+    implementation('com.google.android.gms:play-services-wallet:19.5.0')
 
     // Allow Multidex
-    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation('androidx.multidex:multidex:2.0.1')
 
     // Ensure the same kotlin-stdlib version is used for transitive dependencies
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
+    implementation(platform('org.jetbrains.kotlin:kotlin-bom:2.2.21'))
 
     // To load logos / images
     // The following dependency gives a false suggestion that a newer version is available, 2.8 is the most recent version.
     //noinspection GradleDependency
-    implementation 'com.squareup.picasso:picasso:2.8'
+    implementation('com.squareup.picasso:picasso:2.8')
 }
