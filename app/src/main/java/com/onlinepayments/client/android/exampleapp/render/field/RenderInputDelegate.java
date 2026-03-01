@@ -1,12 +1,22 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.FormElement.Type;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
+import com.onlinepayments.sdk.client.android.infrastructure.apiModels.paymentProduct.displayHints.FormElementDto;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -15,12 +25,11 @@ import java.util.Objects;
 
 /**
  * Delegate which handles the dynamic rendering of fields
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderInputDelegate {
 
     // Map containing all custom renderers per FormElement type
-    private final HashMap<Type, RenderInputFieldInterface> customRenderers;
+    private final HashMap<FormElementDto.Type, RenderInputFieldInterface> customRenderers;
 
     private final RenderInputFieldHelper renderField;
 
@@ -42,7 +51,10 @@ public class RenderInputDelegate {
      * @param renderer, the renderer that is called when the fields are rendered.
      * @noinspection unused
      */
-    public void registerCustomFieldRenderer(Type type, RenderInputFieldInterface renderer) {
+    public void registerCustomFieldRenderer(
+        FormElementDto.Type type,
+        RenderInputFieldInterface renderer
+    ) {
 
         if (type == null) {
             throw new InvalidParameterException(
@@ -72,12 +84,13 @@ public class RenderInputDelegate {
      * @param inputDataPersister, class that holds information about the paymentItem that will be rendered
      */
     public void renderPaymentInputFields(
-        InputDataPersister inputDataPersister, PaymentContext paymentContext
+        InputDataPersister inputDataPersister,
+        PaymentContextWithAmount paymentContext
     ) {
 
         renderPaymentInputFields(
             inputDataPersister,
-            inputDataPersister.getPaymentItem().getPaymentProductFields(),
+            inputDataPersister.getPaymentProduct().getFields(),
             paymentContext
         );
     }
@@ -85,7 +98,7 @@ public class RenderInputDelegate {
     public void renderPaymentInputFields(
         InputDataPersister inputDataPersister,
         List<PaymentProductField> paymentProductFields,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
 
         if (inputDataPersister == null) {
@@ -105,7 +118,7 @@ public class RenderInputDelegate {
 
             RenderInputFieldInterface renderer =
                 registry.getRenderInputFieldForFieldType(Objects.requireNonNull(field.getDisplayHints()
-                    .getFormElement()).getType());
+                    .getFormElementType()));
             if (renderer != null) {
                 renderField.renderField(renderer, field, inputDataPersister, paymentContext);
             }

@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.util;
 
 import android.app.Activity;
@@ -9,9 +19,9 @@ import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.specificdata.PaymentProduct320SpecificData;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.specificData.PaymentProduct320SpecificData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,9 +33,6 @@ import java.util.Objects;
 
 /**
  * Code required to successfully complete a Google Pay payment
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class GooglePay {
 
@@ -33,14 +40,14 @@ public class GooglePay {
     private static final String TAG = GooglePay.class.getName();
 
     private final Activity activity;
-    private final PaymentContext paymentContext;
+    private final PaymentContextWithAmount paymentContext;
     private final PaymentProduct paymentProduct;
     private final String merchantId;
     private final String merchantName;
 
     public GooglePay(
         Activity activity,
-        PaymentContext paymentContext,
+        PaymentContextWithAmount paymentContext,
         PaymentProduct paymentProduct,
         String merchantId,
         String merchantName
@@ -54,7 +61,7 @@ public class GooglePay {
             throw new InvalidParameterException(
                 "Could not create GooglePay. PaymentContext may not be null.");
         }
-        if (paymentProduct == null || !Constants.PAYMENTPRODUCTID_GOOGLEPAY.equals(paymentProduct.getId())) {
+        if (paymentProduct == null || !(paymentProduct.getId() != null && Constants.PAYMENTPRODUCTID_GOOGLEPAY == paymentProduct.getId())) {
             throw new InvalidParameterException(
                 "Could not create GooglePay. PaymentProduct must be set and must be the Google Pay payment product.");
         }
@@ -81,13 +88,15 @@ public class GooglePay {
      */
     public void start(boolean isEnvironmentProduction) {
 
-        PaymentsClient mPaymentsClient = Wallet.getPaymentsClient(activity,
+        PaymentsClient mPaymentsClient = Wallet.getPaymentsClient(
+            activity,
             new Wallet.WalletOptions.Builder().setEnvironment(isEnvironmentProduction
                 ? WalletConstants.ENVIRONMENT_PRODUCTION
                 : WalletConstants.ENVIRONMENT_TEST).build()
         );
 
-        JSONObject paymentDataRequestJson = createGooglePayRequest(paymentContext,
+        JSONObject paymentDataRequestJson = createGooglePayRequest(
+            paymentContext,
             getNetworks(),
             getGatewayId(),
             merchantId,
@@ -95,7 +104,8 @@ public class GooglePay {
         );
 
         PaymentDataRequest request = PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
-        AutoResolveHelper.resolveTask(mPaymentsClient.loadPaymentData(request),
+        AutoResolveHelper.resolveTask(
+            mPaymentsClient.loadPaymentData(request),
             activity,
             LOAD_PAYMENT_DATA_REQUEST_CODE
         );
@@ -111,7 +121,7 @@ public class GooglePay {
      * @param merchantName,   Your company name in Human Readable form. May be shown to the user.
      */
     private JSONObject createGooglePayRequest(
-        PaymentContext paymentContext,
+        PaymentContextWithAmount paymentContext,
         List<String> networks,
         String gatewayId,
         String merchantId,
@@ -135,10 +145,12 @@ public class GooglePay {
             // Insert tokenization specification (only for full payment requests)
             JSONObject tokenizationSpecification = new JSONObject();
             tokenizationSpecification.put("type", "PAYMENT_GATEWAY");
-            tokenizationSpecification.put("parameters",
+            tokenizationSpecification.put(
+                "parameters",
                 new JSONObject().put("gateway", gatewayId).put("gatewayMerchantId", merchantId)
             );
-            allowedPaymentMethodsContent.put("tokenizationSpecification",
+            allowedPaymentMethodsContent.put(
+                "tokenizationSpecification",
                 tokenizationSpecification
             );
 
@@ -148,11 +160,13 @@ public class GooglePay {
             // Insert transaction info (only for full payment requests)
             JSONObject transactionInfo = new JSONObject();
             transactionInfo.put("totalPriceStatus", "FINAL");
-            transactionInfo.put("totalPrice",
+            transactionInfo.put(
+                "totalPrice",
                 Objects.requireNonNull(Objects.requireNonNull(paymentContext.getAmountOfMoney())
                     .getAmount()).toString()
             );
-            transactionInfo.put("currencyCode",
+            transactionInfo.put(
+                "currencyCode",
                 paymentContext.getAmountOfMoney().getCurrencyCode()
             );
             paymentRequest.put("transactionInfo", transactionInfo);
@@ -177,7 +191,8 @@ public class GooglePay {
         JSONObject parameters = new JSONObject();
         try {
             parameters.put("type", "CARD");
-            parameters.put("parameters",
+            parameters.put(
+                "parameters",
                 new JSONObject().put("allowedAuthMethods", allowedAuthMethods)
                     .put("allowedCardNetworks", allowedNetworks)
             );

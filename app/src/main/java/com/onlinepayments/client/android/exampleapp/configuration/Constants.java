@@ -1,15 +1,21 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.configuration;
 
-/**
- * Copyright 2020 Global Collect Services B.V
- */
 public class Constants {
-
     /**
      * Application Identifier, used for identifying the application in network calls
      **/
     public static String APPLICATION_IDENTIFIER =
-        "OnlinePayments Android Java Example Application/v2.3.0";
+        "OnlinePayments Android Java Example Application/v2.4.0";
 
     /**
      * Intent data keys
@@ -46,7 +52,7 @@ public class Constants {
     /**
      * Google Pay
      **/
-    public static final String PAYMENTPRODUCTID_GOOGLEPAY = "320";
+    public static final int PAYMENTPRODUCTID_GOOGLEPAY = 320;
     public static final int GOOGLE_API_VERSION = 2;
     public final static String GOOGLE_PAY_TOKEN_FIELD_ID = "encryptedPaymentData";
 }

@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.content.Context;
@@ -12,33 +22,31 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 import java.util.Objects;
 
 /**
  * This class implements the RenderTooltipInterface and
  * handles the rendering of the tooltip for one payment product field
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderTooltip implements RenderTooltipInterface {
 
     public void renderTooltip(
         final PaymentProductField field,
-        BasicPaymentItem selectedPaymentProduct,
+        BasicPaymentProduct selectedPaymentProduct,
         final ViewGroup rowView
     ) {
         // Get the tooltip text & imageURL
         final String tooltipText =
-            Objects.requireNonNull(field.getDisplayHints().getTooltip()).getLabel();
+            Objects.requireNonNull(field.getDisplayHints().getTooltipLabel());
 
         // Set the tooltip text
         renderTooltip(field.getId(), tooltipText, rowView);
     }
 
     public void renderRememberMeTooltip(Context context, final ViewGroup rowView) {
-
         // Check if the translated tooltip text is in the translations file.
         // If not, don't show the tooltip
         final String tooltipText =
@@ -48,9 +56,10 @@ public class RenderTooltip implements RenderTooltipInterface {
     }
 
     private void renderTooltip(
-        final String fieldId, final String tooltipText, final ViewGroup rowView
+        final String fieldId,
+        final String tooltipText,
+        final ViewGroup rowView
     ) {
-
         if (tooltipText != null && !tooltipText.isEmpty() && !StringProvider.isBadTranslationKey(
             tooltipText)) {
             // Add the question mark tooltip image after the input field
@@ -113,7 +122,6 @@ public class RenderTooltip implements RenderTooltipInterface {
      * @param rowView,     the view under who the textview is added
      */
     private void addTooltipTextView(String tooltipText, String fieldId, ViewGroup rowView) {
-
         // Create a new LinearLayout and add it under the rowView.
         LinearLayout tooltipLayout = new LinearLayout(rowView.getContext());
         tooltipLayout.setOrientation(LinearLayout.VERTICAL);
@@ -123,7 +131,8 @@ public class RenderTooltip implements RenderTooltipInterface {
             new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         // Tooltip text layout dimensions
         int TOOLTIP_TEXT_MARGIN = 9;
-        tooltipLayoutParams.setMargins(TOOLTIP_TEXT_MARGIN,
+        tooltipLayoutParams.setMargins(
+            TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN
@@ -132,12 +141,14 @@ public class RenderTooltip implements RenderTooltipInterface {
         // Create a new TextView and add it to the tooltipLayout
         TextView tooltipTextView = new TextView(rowView.getContext());
         tooltipTextView.setText(tooltipText);
-        tooltipLayout.addView(tooltipTextView,
+        tooltipLayout.addView(
+            tooltipTextView,
             new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         );
 
         ViewGroup parentViewGroup = (ViewGroup) rowView.getParent();
-        parentViewGroup.addView(tooltipLayout,
+        parentViewGroup.addView(
+            tooltipLayout,
             parentViewGroup.indexOfChild(rowView) + 1,
             tooltipLayoutParams
         );

@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view.detailview;
 
 import android.app.Activity;
@@ -16,13 +26,12 @@ import com.onlinepayments.client.android.exampleapp.render.field.RenderTooltip;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
 import com.onlinepayments.client.android.exampleapp.render.validation.RenderValidationHelper;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.validation.ValidationErrorMessage;
 
 /**
  * View for the DetailInputActivity
- * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputViewImpl implements DetailInputView {
 
@@ -49,14 +58,11 @@ public class DetailInputViewImpl implements DetailInputView {
     @Override
     public void renderDynamicContent(
         InputDataPersister inputDataPersister,
-        PaymentContext paymentContext,
+        PaymentContextWithAmount paymentContext,
         InputValidationPersister inputValidationPersister
     ) {
         fieldRenderer.renderPaymentInputFields(inputDataPersister, paymentContext);
-        renderValidationHelper.renderValidationMessages(
-            inputValidationPersister,
-            inputDataPersister.getPaymentItem()
-        );
+        renderValidationHelper.renderValidationMessages(inputValidationPersister);
     }
 
     @Override
@@ -102,17 +108,17 @@ public class DetailInputViewImpl implements DetailInputView {
     @Override
     public void renderValidationMessage(
         ValidationErrorMessage validationResult,
-        PaymentItem paymentItem
+        PaymentProduct paymentProduct
     ) {
-        renderValidationHelper.renderValidationMessage(validationResult, paymentItem);
+        renderValidationHelper.renderValidationMessage(validationResult);
     }
 
     @Override
     public void renderValidationMessages(
         InputValidationPersister inputValidationPersister,
-        PaymentItem paymentItem
+        PaymentProduct paymentProduct
     ) {
-        renderValidationHelper.renderValidationMessages(inputValidationPersister, paymentItem);
+        renderValidationHelper.renderValidationMessages(inputValidationPersister);
     }
 
     @Override

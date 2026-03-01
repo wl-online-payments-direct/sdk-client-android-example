@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.accountonfile;
 
 import android.content.Context;
@@ -8,34 +18,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileDisplay;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
 import com.squareup.picasso.Picasso;
 
 import java.security.InvalidParameterException;
 
 /**
  * Renders the accounts on file on screen
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderAccountOnFile implements RenderAccountOnFileInterface {
 
     @Override
     public void renderAccountOnFile(
-        AccountOnFile accountOnFile, BasicPaymentItem paymentItem, ViewGroup parent
+        AccountOnFile accountOnFile,
+        BasicPaymentProduct basicPaymentProduct,
+        ViewGroup parent
     ) {
 
         if (accountOnFile == null) {
             throw new InvalidParameterException(
                 "Error renderingAccountOnFile, accountOnFile may not be null");
         }
-        if (paymentItem == null) {
+
+        if (basicPaymentProduct == null) {
             throw new InvalidParameterException(
-                "Error renderingAccountOnFile, paymentItem may not be null");
+                "Error renderingAccountOnFile, paymentProduct may not be null");
         }
+
         if (parent == null) {
             throw new InvalidParameterException(
                 "Error renderingAccountOnFile, parent may not be null");
@@ -55,31 +65,17 @@ public class RenderAccountOnFile implements RenderAccountOnFileInterface {
         ImageView accountOnFileLogoImageView =
             paymentProductLayout.findViewById(R.id.paymentProductLogo);
 
-        // Set the correct value
-        String formattedValue = null;
-        for (AccountOnFileAttribute attribute : accountOnFile.getAttributes()) {
+        String formattedValue = accountOnFile.getLabel();
 
-            assert accountOnFile.getDisplayHints() != null;
-            for (AccountOnFileDisplay displayEntry : accountOnFile.getDisplayHints()
-                .getLabelTemplate()) {
-
-                if (attribute.getKey().equals(displayEntry.getKey())) {
-                    formattedValue = accountOnFile.getMaskedValue(attribute.getKey());
-                }
-            }
-        }
         accountOnFileTextView.setText(formattedValue);
 
         // Set the logo
-        if (!paymentItem.getDisplayHintsList().isEmpty()) {
-            DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
-            String logoUrl = displayHints.getLogoUrl();
+        String logoUrl = basicPaymentProduct.getLogo();
 
-            if (logoUrl != null && !logoUrl.isEmpty()) {
-                Picasso.get().load(logoUrl).into(accountOnFileLogoImageView);
-            } else {
-                accountOnFileLogoImageView.setImageDrawable(null);
-            }
+        if (logoUrl != null && !logoUrl.isEmpty()) {
+            Picasso.get().load(logoUrl).into(accountOnFileLogoImageView);
+        } else {
+            accountOnFileLogoImageView.setImageDrawable(null);
         }
 
         parent.addView(paymentProductLayout);

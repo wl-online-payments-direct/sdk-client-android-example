@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view.detailview;
 
 import android.app.Activity;
@@ -15,10 +25,9 @@ import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTe
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.RenderIinCoBranding;
 import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.validation.ValidationErrorMessage;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -26,7 +35,6 @@ import java.util.List;
 
 /**
  * View for the DetailInputActivity with added functionality for credit card payment products
- * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implements
     DetailInputViewCreditCard {
@@ -52,7 +60,8 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
         IinDetailsPersister iinDetailsPersister,
         boolean hasAccountOnFile
     ) {
-        creditCardField = rootView.findViewWithTag(CREDIT_CARD_NUMBER_FIELD_ID);
+        creditCardField = rootView.findViewWithTag("cardNumber");
+
         if (creditCardField == null) {
             throw new ViewNotInitializedException(
                 "CreditCardField has not been found, did you forget to render the input fields?");
@@ -66,7 +75,8 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
             }
 
             AccountOnFileCardTextWatcher accountOnFileCardTextWatcher =
-                new AccountOnFileCardTextWatcher(inputDataPersister,
+                new AccountOnFileCardTextWatcher(
+                    inputDataPersister,
                     CREDIT_CARD_NUMBER_FIELD_ID,
                     creditCardField,
                     accountOnFileValue,
@@ -101,33 +111,34 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
 
     @Override
     public void renderLuhnValidationMessage() {
-        renderValidationHelper.renderValidationMessage(new ValidationErrorMessage("luhn",
+        renderValidationHelper.renderValidationMessage(new ValidationErrorMessage(
+            "luhn",
             CREDIT_CARD_NUMBER_FIELD_ID,
-            null
-        ), null);
+            ""
+        ));
     }
 
     @Override
     public void renderNotAllowedInContextValidationMessage() {
-        renderValidationHelper.renderValidationMessage(new ValidationErrorMessage("allowedInContext",
+        renderValidationHelper.renderValidationMessage(new ValidationErrorMessage(
+            "allowedInContext",
             CREDIT_CARD_NUMBER_FIELD_ID,
-            null
-        ), null);
+            ""
+        ));
     }
 
     @Override
     public void removeCreditCardValidationMessage() {
-        renderValidationHelper.removeValidationMessage(renderInputFieldsLayout,
+        renderValidationHelper.removeValidationMessage(
+            renderInputFieldsLayout,
             CREDIT_CARD_NUMBER_FIELD_ID
         );
     }
 
     @Override
-    public void renderPaymentProductLogoByIdInCreditCardField(PaymentItem paymentItem) {
+    public void renderPaymentProductLogoByIdInCreditCardField(PaymentProduct paymentProduct) {
         // Get the logo from its payment product
-        if (!paymentItem.getDisplayHintsList().isEmpty()) {
-            DisplayHintsPaymentItem displayHints = paymentItem.getDisplayHintsList().get(0);
-
+        if (paymentProduct.getLogo() != null && !paymentProduct.getLogo().isBlank()) {
             Target creditCardFieldTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -140,7 +151,8 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
                     Drawable resizedDrawable =
                         new BitmapDrawable(rootView.getContext().getResources(), resizedBitmap);
 
-                    creditCardField.setCompoundDrawablesWithIntrinsicBounds(null,
+                    creditCardField.setCompoundDrawablesWithIntrinsicBounds(
+                        null,
                         null,
                         resizedDrawable,
                         null
@@ -159,7 +171,7 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
                 }
             };
 
-            Picasso.get().load(displayHints.getLogoUrl()).into(creditCardFieldTarget);
+            Picasso.get().load(paymentProduct.getLogo()).into(creditCardFieldTarget);
         }
     }
 
@@ -170,12 +182,14 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
 
     @Override
     public void renderCoBrandNotification(
-        List<BasicPaymentItem> paymentProductsAllowedInContext, View.OnClickListener listener
+        List<BasicPaymentProduct> paymentProductsAllowedInContext,
+        View.OnClickListener listener
     ) {
         // Show the user he can choose another cobrand if there are indeed more cobrands available
         if (paymentProductsAllowedInContext.size() > 1) {
             // Retrieve the logo from the top most PaymentProduct
-            coBrandRenderer.renderIinCoBrandNotification(rootView.getContext(),
+            coBrandRenderer.renderIinCoBrandNotification(
+                rootView.getContext(),
                 paymentProductsAllowedInContext,
                 renderInputFieldsLayout,
                 CREDIT_CARD_NUMBER_FIELD_ID,
@@ -186,7 +200,8 @@ public class DetailInputViewCreditCardImpl extends DetailInputViewImpl implement
 
     @Override
     public void removeCoBrandNotification() {
-        coBrandRenderer.removeIinCoBrandNotification(renderInputFieldsLayout,
+        coBrandRenderer.removeIinCoBrandNotification(
+            renderInputFieldsLayout,
             CREDIT_CARD_NUMBER_FIELD_ID
         );
     }

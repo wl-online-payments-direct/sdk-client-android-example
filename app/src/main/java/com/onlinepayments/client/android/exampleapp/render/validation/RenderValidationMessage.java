@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.validation;
 
 import android.view.View;
@@ -12,7 +22,6 @@ import java.security.InvalidParameterException;
 /**
  * This class implements the RenderValidationMessage and
  * handles the rendering of the validation message for one payment product field
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderValidationMessage implements RenderValidationMessageInterface {
 
@@ -21,9 +30,10 @@ public class RenderValidationMessage implements RenderValidationMessageInterface
 
     @Override
     public void renderValidationMessage(
-        String validationMessage, ViewGroup rowView, String fieldId
+        String validationMessage,
+        ViewGroup rowView,
+        String fieldId
     ) {
-
         if (validationMessage == null) {
             throw new InvalidParameterException(
                 "Error rendering ValidationMessage, validationMessage may not be null");
@@ -41,20 +51,22 @@ public class RenderValidationMessage implements RenderValidationMessageInterface
         TextView validationMessageView = new TextView(rowView.getContext());
         validationMessageView.setText(validationMessage);
         validationMessageView.setTag(VALIDATION_MESSAGE_TAG_PREFIX + fieldId);
-        validationMessageView.setTextAppearance(rowView.getContext(), R.style.ErrorMessage);
+        validationMessageView.setTextAppearance(R.style.ErrorMessage);
 
         LayoutParams layoutParams =
             new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         // Error message layout dimensions
         int TOOLTIP_TEXT_MARGIN = 9;
-        layoutParams.setMargins(TOOLTIP_TEXT_MARGIN,
+        layoutParams.setMargins(
+            TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN
         );
 
         ViewGroup parentViewGroup = (ViewGroup) rowView.getParent();
-        parentViewGroup.addView(validationMessageView,
+        parentViewGroup.addView(
+            validationMessageView,
             parentViewGroup.indexOfChild(rowView) + 1,
             layoutParams
         );

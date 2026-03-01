@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.activities;
 
 import android.app.Activity;
@@ -8,22 +18,19 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.client.android.exampleapp.view.ValidationEditText;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCartItem;
-import com.onlinepayments.sdk.client.android.model.AmountOfMoney;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
+import com.onlinepayments.client.android.exampleapp.view.ValidationEditText;
+import com.onlinepayments.sdk.client.android.domain.AmountOfMoneyWithAmount;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
 
 import java.util.Currency;
 import java.util.Locale;
 
 /**
  * Dummy startPage to start payment.
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class StartPageActivity extends Activity {
 
@@ -100,9 +107,11 @@ public class StartPageActivity extends Activity {
         ShoppingCart cart = new ShoppingCart();
         cart.addItemToShoppingCart(new ShoppingCartItem("Something", Long.parseLong(amount), 1));
 
-        // Create the PaymentContext object
-        AmountOfMoney amountOfMoney = new AmountOfMoney(cart.getTotalAmount(), currencyCode);
-        PaymentContext paymentContext = new PaymentContext(amountOfMoney, countryCode, isRecurring);
+        // Create the PaymentContextWithAmount object
+        AmountOfMoneyWithAmount amountOfMoney =
+            new AmountOfMoneyWithAmount(cart.getTotalAmount(), currencyCode);
+        PaymentContextWithAmount paymentContext =
+            new PaymentContextWithAmount(amountOfMoney, countryCode, isRecurring);
 
         // and show the PaymentProductSelectionActivity
         Intent paymentIntent = new Intent(this, PaymentProductSelectionActivity.class);
@@ -110,7 +119,8 @@ public class StartPageActivity extends Activity {
         // Attach the following objects to the paymentIntent
         paymentIntent.putExtra(Constants.INTENT_PAYMENT_CONTEXT, paymentContext);
         paymentIntent.putExtra(Constants.INTENT_SHOPPINGCART, cart);
-        paymentIntent.putExtra(Constants.MERCHANT_CLIENT_SESSION_IDENTIFIER,
+        paymentIntent.putExtra(
+            Constants.MERCHANT_CLIENT_SESSION_IDENTIFIER,
             clientSessionIdentifier
         );
         paymentIntent.putExtra(Constants.MERCHANT_CUSTOMER_IDENTIFIER, customerId);
@@ -118,7 +128,8 @@ public class StartPageActivity extends Activity {
         paymentIntent.putExtra(Constants.MERCHANT_NAME, merchantName);
         paymentIntent.putExtra(Constants.MERCHANT_CLIENT_API_URL, clientApiUrl);
         paymentIntent.putExtra(Constants.MERCHANT_ASSET_URL, assetUrl);
-        paymentIntent.putExtra(Constants.MERCHANT_ENVIRONMENT_IS_PRODUCTION,
+        paymentIntent.putExtra(
+            Constants.MERCHANT_ENVIRONMENT_IS_PRODUCTION,
             environmentIsProduction
         );
 
@@ -127,18 +138,20 @@ public class StartPageActivity extends Activity {
     }
 
     public void parseJsonButtonPressed(View view) {
-        DialogUtil.showJsonAlertDialog(this, sessionDetails -> {
+        DialogUtil.showJsonAlertDialog(
+            this, sessionDetails -> {
 
-            assetUrlEditText.setText(sessionDetails.assetUrl);
-            clientApiUrlEditText.setText(sessionDetails.clientApiUrl);
-            clientSessionIdentifierEditText.setText(sessionDetails.clientSessionId);
-            customerIdentifierEditText.setText(sessionDetails.customerId);
+                assetUrlEditText.setText(sessionDetails.assetUrl);
+                clientApiUrlEditText.setText(sessionDetails.clientApiUrl);
+                clientSessionIdentifierEditText.setText(sessionDetails.clientSessionId);
+                customerIdentifierEditText.setText(sessionDetails.customerId);
 
-            assetUrlEditText.isValid();
-            clientApiUrlEditText.isValid();
-            clientSessionIdentifierEditText.isValid();
-            customerIdentifierEditText.isValid();
-        });
+                assetUrlEditText.isValid();
+                clientApiUrlEditText.isValid();
+                clientSessionIdentifierEditText.isValid();
+                customerIdentifierEditText.isValid();
+            }
+        );
     }
 
     private void loadData() {

@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.View;
@@ -8,9 +18,10 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.client.android.exampleapp.util.AttributeUtil;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFileAttribute;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -18,7 +29,6 @@ import java.util.List;
 
 /**
  * This class handles all rendering of the list field
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderList implements RenderInputFieldInterface, AdapterView.OnItemSelectedListener {
 
@@ -27,16 +37,17 @@ public class RenderList implements RenderInputFieldInterface, AdapterView.OnItem
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
-
         if (field == null) {
             throw new InvalidParameterException("Error rendering list, field may not be null");
         }
+
         if (inputDataPersister == null) {
             throw new InvalidParameterException(
                 "Error rendering list, inputDataPersister may not be null");
         }
+
         if (rowView == null) {
             throw new InvalidParameterException("Error rendering list, rowView may not be null");
         }
@@ -55,14 +66,12 @@ public class RenderList implements RenderInputFieldInterface, AdapterView.OnItem
 
         // Set the spinner to the stored value in the account
         if (inputDataPersister.getAccountOnFile() != null) {
-
-            for (AccountOnFileAttribute attribute : inputDataPersister.getAccountOnFile()
-                .getAttributes()) {
+            for (AccountOnFileAttribute attribute : AttributeUtil.getAttributes(inputDataPersister.getAccountOnFile())) {
                 if (attribute.getKey().equals(field.getId())) {
                     int spinnerPosition = dataAdapter.getPosition(attribute.getValue());
                     spinner.setSelection(spinnerPosition);
 
-                    if (!attribute.isEditingAllowed()) {
+                    if (!inputDataPersister.getAccountOnFile().isWritable(attribute.getKey())) {
                         spinner.setEnabled(false);
                     }
                 }
@@ -83,6 +92,7 @@ public class RenderList implements RenderInputFieldInterface, AdapterView.OnItem
         LayoutParams params =
             new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         rowView.addView(spinner, params);
+
         return spinner;
     }
 

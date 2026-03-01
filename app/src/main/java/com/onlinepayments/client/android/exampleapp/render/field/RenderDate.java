@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.View;
@@ -6,17 +16,17 @@ import android.widget.DatePicker;
 import android.widget.DatePicker.OnDateChangedListener;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.client.android.exampleapp.util.AttributeUtil;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFileAttribute;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 import java.security.InvalidParameterException;
 import java.util.Calendar;
 
 /**
  * This class handles all rendering of Date fields
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderDate implements RenderInputFieldInterface {
 
@@ -25,9 +35,8 @@ public class RenderDate implements RenderInputFieldInterface {
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
-
         if (field == null) {
             throw new InvalidParameterException("Error rendering dateField, field may not be null");
         }
@@ -61,13 +70,13 @@ public class RenderDate implements RenderInputFieldInterface {
 
         // Set values from account on file
         if (accountOnFile != null) {
-            for (AccountOnFileAttribute attribute : accountOnFile.getAttributes()) {
+            for (AccountOnFileAttribute attribute : AttributeUtil.getAttributes(inputDataPersister.getAccountOnFile())) {
                 if (attribute.getKey().equals(field.getId())) {
                     String date = attribute.getValue();
                     setDateFromString(datePicker, date, listener);
                 }
 
-                if (!attribute.isEditingAllowed()) {
+                if (!accountOnFile.isWritable(attribute.getKey())) {
                     datePicker.setEnabled(false);
                 }
             }
@@ -85,7 +94,9 @@ public class RenderDate implements RenderInputFieldInterface {
     }
 
     private void setDateFromString(
-        DatePicker datePicker, String dateString, OnDateChangedListener listener
+        DatePicker datePicker,
+        String dateString,
+        OnDateChangedListener listener
     ) {
         // The date is in YYYYMMDD format, so it can be decomposed like so
         int year = Integer.parseInt(dateString.substring(0, 4));
@@ -97,7 +108,8 @@ public class RenderDate implements RenderInputFieldInterface {
     }
 
     private OnDateChangedListener createOnDateChangedListener(
-        final InputDataPersister inputDataPersister, final String fieldId
+        final InputDataPersister inputDataPersister,
+        final String fieldId
     ) {
         return (datePicker, year, month, day) -> {
             month++; // Months are 0 based in Android

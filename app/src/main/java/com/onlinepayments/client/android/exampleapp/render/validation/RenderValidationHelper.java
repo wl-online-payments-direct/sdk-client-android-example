@@ -1,23 +1,25 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.validation;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
-import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationRule;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleLength;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleRange;
+import com.onlinepayments.sdk.client.android.domain.validation.ValidationErrorMessage;
 
 import java.security.InvalidParameterException;
-import java.text.MessageFormat;
 
 /**
  * Helper class for rendering validation messages
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderValidationHelper {
 
@@ -27,8 +29,6 @@ public class RenderValidationHelper {
 
     // The parent view to which all validationMessages are added
     private final ViewGroup parentView;
-
-    private final StringProvider stringProvider;
 
     /**
      * Constructor
@@ -43,41 +43,33 @@ public class RenderValidationHelper {
         }
 
         this.parentView = parentView;
-        stringProvider = StringProvider.getInstance(parentView.getContext());
     }
 
     /**
      * Renders validationMessage for every invalid field in the invalidFields list
      *
-     * @param paymentItem, the paymentItem for which to render the validationMessages
      */
     public void renderValidationMessages(
-        InputValidationPersister inputValidationPersister, PaymentItem paymentItem
+        InputValidationPersister inputValidationPersister
     ) {
 
         for (ValidationErrorMessage validationResult : inputValidationPersister.getErrorMessages()) {
-            renderValidationMessageOnScreen(validationResult, paymentItem);
+            renderValidationMessageOnScreen(validationResult);
         }
     }
 
     public void renderValidationMessage(
-        ValidationErrorMessage validationResult, PaymentItem paymentItem
+        ValidationErrorMessage validationResult
     ) {
-
-        renderValidationMessageOnScreen(validationResult, paymentItem);
+        renderValidationMessageOnScreen(validationResult);
     }
 
     private String getValidationMessage(ValidationErrorMessage validationResult) {
-        String errorMessageId = validationResult.getErrorMessage();
-        if ("length".equals(validationResult.getErrorMessage()) && validationResult.getRule() instanceof ValidationRuleLength) {
-            errorMessageId = getCorrectIdentifierForLength(validationResult);
-        }
-
-        return stringProvider.getValidationMessage(errorMessageId);
+        return validationResult.getErrorMessage();
     }
 
     private void renderValidationMessageOnScreen(
-        ValidationErrorMessage validationResult, PaymentItem paymentItem
+        ValidationErrorMessage validationResult
     ) {
 
         String fieldId = validationResult.getPaymentProductFieldId();
@@ -91,55 +83,8 @@ public class RenderValidationHelper {
 
         String validationMessage = getValidationMessage(validationResult);
 
-        if (validationResult.getRule() != null && paymentItem != null) {
-            // Find the correct validationRule and format its message with variables attributes
-            for (PaymentProductField field : paymentItem.getPaymentProductFields()) {
-                if (field.getId().equals(validationResult.getPaymentProductFieldId())) {
-
-                    ValidationRule rule = validationResult.getRule();
-
-                    // if ValidationRuleLength, then add extra information to the errorMessage
-                    if (rule instanceof ValidationRuleLength) {
-
-                        // Replace the generic placeholders with Java specific placeholders, e.g. {maxLength} becomes {0}
-                        validationMessage = formatMessagePlaceHolders(validationMessage);
-
-                        // Show only the maxLength message if there is only one placeholder, else show minLength and maxLength
-                        if (validationMessage.split("\\{").length == 2) {
-                            validationMessage = MessageFormat.format(validationMessage,
-                                ((ValidationRuleLength) rule).getMaxLength()
-                            );
-                        } else if (validationMessage.split("\\{").length == 3) {
-                            validationMessage = MessageFormat.format(validationMessage,
-                                ((ValidationRuleLength) rule).getMinLength(),
-                                ((ValidationRuleLength) rule).getMaxLength()
-                            );
-                        }
-                    }
-
-                    // if ValidationRuleRange,then add extra information to the errorMessage
-                    if (rule instanceof ValidationRuleRange) {
-
-                        // Replace the generic placeholders with Java specific placeholders, e.g. {maxLength} becomes {0}
-                        validationMessage = formatMessagePlaceHolders(validationMessage);
-
-                        // Show only the maxvalue if there is only one placeholder, else show minvalue and maxvalue
-                        if (validationMessage.split("\\{").length == 2) {
-                            validationMessage = MessageFormat.format(validationMessage,
-                                ((ValidationRuleRange) rule).getMaxValue()
-                            );
-                        } else if (validationMessage.split("\\{").length == 3) {
-                            validationMessage = MessageFormat.format(validationMessage,
-                                ((ValidationRuleRange) rule).getMinValue(),
-                                ((ValidationRuleRange) rule).getMaxValue()
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        validationMessageRenderer.renderValidationMessage(validationMessage,
+        validationMessageRenderer.renderValidationMessage(
+            validationMessage,
             (ViewGroup) view.getParent(),
             validationResult.getPaymentProductFieldId()
         );
@@ -154,20 +99,6 @@ public class RenderValidationHelper {
         // Check if there is not already an error message for this field
         return ((ViewGroup) fieldView.getParent().getParent()).findViewWithTag(
             RenderValidationMessage.VALIDATION_MESSAGE_TAG_PREFIX + fieldId) == null;
-    }
-
-    private String getCorrectIdentifierForLength(ValidationErrorMessage validationResult) {
-        ValidationRuleLength validationRuleLength =
-            (ValidationRuleLength) validationResult.getRule();
-        if (validationRuleLength.getMaxLength() == validationRuleLength.getMinLength()) {
-            return "length_exact";
-        }
-
-        if (validationRuleLength.getMinLength() == 0) {
-            return "length_max";
-        }
-
-        return "length_between";
     }
 
     public void removeValidationMessage(ViewGroup rowView, String fieldId) {
@@ -193,24 +124,11 @@ public class RenderValidationHelper {
             View view =
                 parentView.findViewWithTag(validationErrorMessage.getPaymentProductFieldId());
             if (view != null) {
-                validationMessageRenderer.removeValidationMessage((ViewGroup) view.getParent(),
+                validationMessageRenderer.removeValidationMessage(
+                    (ViewGroup) view.getParent(),
                     validationErrorMessage.getPaymentProductFieldId()
                 );
             }
         }
-    }
-
-    /**
-     * Formats message placeholders to Java format, eg {maxLength} to {0}
-     */
-    private String formatMessagePlaceHolders(String message) {
-
-        int occurrences = 0;
-        while (message.matches(".*\\{[a-zA-Z]+\\}.*")) {
-
-            message = message.replaceFirst("\\{[a-zA-Z]+\\}", "{" + occurrences + "}");
-            occurrences++;
-        }
-        return message;
     }
 }

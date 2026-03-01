@@ -1,17 +1,22 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.persister;
 
-import com.onlinepayments.sdk.client.android.model.iin.IinDetailsResponse;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.domain.iin.IinDetailsResponse;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Will persist IinDetails information
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class IinDetailsPersister implements Serializable {
 
@@ -20,17 +25,11 @@ public class IinDetailsPersister implements Serializable {
 
     private IinDetailsResponse iinDetailsResponse;
 
-    private List<BasicPaymentItem> paymentProducts;
-
     public void setIinDetailsResponse(IinDetailsResponse iinDetailsResponse) {
         this.iinDetailsResponse = iinDetailsResponse;
     }
 
     public IinDetailsResponse getIinDetailsResponse() {
         return iinDetailsResponse;
-    }
-
-    public List<BasicPaymentItem> getPaymentProducts() {
-        return paymentProducts;
     }
 }

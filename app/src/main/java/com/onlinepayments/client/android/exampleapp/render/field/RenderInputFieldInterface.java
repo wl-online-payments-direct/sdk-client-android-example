@@ -1,16 +1,24 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 /**
  * Defines the rendering of input fields interface
- * <p>
- * Copyright 2020 Global Collect Services B.V
  */
 public interface RenderInputFieldInterface {
     /***
@@ -28,6 +36,6 @@ public interface RenderInputFieldInterface {
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     );
 }

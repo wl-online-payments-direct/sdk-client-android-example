@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.dialog;
 
 import android.app.AlertDialog;
@@ -9,9 +19,6 @@ import android.content.DialogInterface.OnClickListener;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-/**
- * Copyright 2020 Global Collect Services B.V
- */
 public class DialogUtil {
 
     private DialogUtil() {
@@ -20,22 +27,25 @@ public class DialogUtil {
     /**
      * Shows an AlertDialog with the given parameters
      *
-     * @param context,      Context where the AlertDialog is added to
-     * @param titleId,      the String resource identifier for the title of the AlertDialog
-     * @param messageId,    the String resource identifier for the message of the AlertDialog
-     * @param buttonTextId, the String resource identifier for the button text of the AlertDialog
-     * @param listener,     the optional listener for the dialog
+     * @param context,           Context where the AlertDialog is added to
+     * @param titleId,           the String resource identifier for the title of the AlertDialog
+     * @param fallbackMessageId, the String resource identifier for the message of the AlertDialog
+     * @param buttonTextId,      the String resource identifier for the button text of the AlertDialog
+     * @param messageString,     the String message from SDK
+     * @param listener,          the optional listener for the dialog
      */
     public static AlertDialog showAlertDialog(
         Context context,
         @StringRes Integer titleId,
-        @StringRes Integer messageId,
+        @StringRes Integer fallbackMessageId,
         @StringRes Integer buttonTextId,
+        @Nullable String messageString,
         @Nullable OnClickListener listener
     ) {
 
         String title = context.getString(titleId);
-        String message = context.getString(messageId);
+        String message =
+            messageString != null ? messageString : context.getString(fallbackMessageId);
         String buttonText = context.getString(buttonTextId);
 
         // Create a new AlertDialog and set all texts
@@ -45,8 +55,10 @@ public class DialogUtil {
 
         // If there is no listener, add empty one
         if (listener == null) {
-            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, buttonText, (dialog, which) -> {
-            });
+            alertDialog.setButton(
+                DialogInterface.BUTTON_NEGATIVE, buttonText, (dialog, which) -> {
+                }
+            );
         } else {
             alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, buttonText, listener);
         }
@@ -83,7 +95,8 @@ public class DialogUtil {
      * @param listener, the listener that will receive the parsed results
      */
     public static void showJsonAlertDialog(
-        Context context, ParseJsonDialog.JsonParsedListener listener
+        Context context,
+        ParseJsonDialog.JsonParsedListener listener
     ) {
         ParseJsonDialog dialog = new ParseJsonDialog(listener, context);
         dialog.setTitle("Paste JSON");

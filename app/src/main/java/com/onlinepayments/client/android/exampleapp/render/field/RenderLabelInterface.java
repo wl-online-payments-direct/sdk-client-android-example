@@ -1,16 +1,23 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 /**
  * Defines the rendering of label interface methods
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public interface RenderLabelInterface {
 
@@ -23,6 +30,8 @@ public interface RenderLabelInterface {
      * @noinspection UnusedReturnValue
      */
     TextView renderLabel(
-        PaymentProductField field, BasicPaymentItem selectedPaymentProduct, ViewGroup rowView
+        PaymentProductField field,
+        BasicPaymentProduct selectedPaymentProduct,
+        ViewGroup rowView
     );
 }

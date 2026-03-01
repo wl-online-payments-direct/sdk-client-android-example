@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import static com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCardImpl.CREDIT_CARD_NUMBER_FIELD_ID;
@@ -11,19 +21,20 @@ import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
-import com.onlinepayments.sdk.client.android.model.validation.AbstractValidationRule;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationRuleLength;
+import com.onlinepayments.client.android.exampleapp.util.AttributeUtil;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFileAttribute;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductFieldType;
+import com.onlinepayments.sdk.client.android.domain.validation.rules.ValidationRule;
+import com.onlinepayments.sdk.client.android.domain.validation.rules.ValidationRuleLength;
 
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
 /**
  * This class handles all rendering of the TextField field
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderTextField implements RenderInputFieldInterface {
 
@@ -32,15 +43,16 @@ public class RenderTextField implements RenderInputFieldInterface {
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
-
         if (field == null) {
             throw new InvalidParameterException("Error rendering textField, field may not be null");
         }
+
         if (rowView == null) {
             throw new InvalidParameterException("Error rendering textField, rowView may not be null");
         }
+
         if (inputDataPersister == null) {
             throw new InvalidParameterException(
                 "Error rendering textField, inputDataPersister may not be null");
@@ -50,9 +62,9 @@ public class RenderTextField implements RenderInputFieldInterface {
 
         // Create new EditText and set its style, restrictions, mask and keyboardType
         EditText editText = new EditText(rowView.getContext());
-        editText.setTextAppearance(rowView.getContext(), R.style.TextField);
+        editText.setTextAppearance(R.style.TextField);
 
-        for (AbstractValidationRule rule : field.getDataRestrictions().getValidationRules()) {
+        for (ValidationRule rule : field.getDataRestrictions().getValidationRules()) {
             if (rule instanceof ValidationRuleLength) {
                 // Set maxLength for field
                 int maxLength = ((ValidationRuleLength) rule).getMaxLength();
@@ -103,19 +115,19 @@ public class RenderTextField implements RenderInputFieldInterface {
 
         // Set values from account on file
         if (accountOnFile != null) {
-            for (AccountOnFileAttribute attribute : accountOnFile.getAttributes()) {
+            for (AccountOnFileAttribute attribute : AttributeUtil.getAttributes(inputDataPersister.getAccountOnFile())) {
                 if (attribute.getKey().equals(field.getId())) {
-                    if (field.getType() == PaymentProductField.Type.EXPIRYDATE && addMasking) {
+                    if (field.getType() == PaymentProductFieldType.EXPIRYDATE && addMasking) {
                         String maskedValue = field.applyMask(attribute.getValue());
                         editText.setText(maskedValue);
                     } else if (addMasking) {
-                        String maskedValue = accountOnFile.getMaskedValue(attribute.getKey(), mask);
+                        String maskedValue = field.applyMask(attribute.getValue());
                         editText.setText(maskedValue);
                     } else {
                         editText.setText(attribute.getValue());
                     }
 
-                    if (!attribute.isEditingAllowed()) {
+                    if (!accountOnFile.isWritable(attribute.getKey())) {
                         editText.setEnabled(false);
                     }
                 }

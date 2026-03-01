@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.activities;
 
 import android.content.Intent;
@@ -14,36 +24,34 @@ import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputValidationPersister;
-import com.onlinepayments.client.android.exampleapp.util.SessionManager;
+import com.onlinepayments.client.android.exampleapp.util.SdkManager;
 import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewImpl;
-import com.onlinepayments.sdk.client.android.exception.EncryptDataException;
-import com.onlinepayments.sdk.client.android.listener.PaymentRequestPreparedListener;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.PreparedPaymentRequest;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.model.validation.ValidationErrorMessage;
-import com.onlinepayments.sdk.client.android.session.Session;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.exceptions.SdkException;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentRequest.EncryptedRequest;
+import com.onlinepayments.sdk.client.android.domain.validation.ValidationErrorMessage;
+import com.onlinepayments.sdk.client.android.facade.OnlinePaymentsSdk;
+import com.onlinepayments.sdk.client.android.facade.listeners.PaymentRequestPreparedListener;
 
 import java.util.List;
 
 /**
  * DetailInputActivity in which users will be asked for their payment details.
- * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputActivity extends ShoppingCartActivity {
 
     protected DetailInputViewImpl fieldView;
 
-    protected Session session;
+    protected OnlinePaymentsSdk sdk;
 
-    // The PaymentItem and possibly Account On File for which the input details are requested in this Activity
-    protected PaymentItem paymentItem;
+    // The PaymentProduct and possibly Account On File for which the input details are requested in this Activity
+    protected PaymentProduct paymentProduct;
     protected AccountOnFile accountOnFile;
 
     protected InputDataPersister inputDataPersister;
-    protected PaymentContext paymentContext;
+    protected PaymentContextWithAmount paymentContext;
     protected ShoppingCart shoppingCart;
 
     protected InputValidationPersister inputValidationPersister;
@@ -63,12 +71,12 @@ public class DetailInputActivity extends ShoppingCartActivity {
 
         loadIntentData();
 
-        inputDataPersister = new InputDataPersister(paymentItem);
+        inputDataPersister = new InputDataPersister(paymentProduct);
         if (accountOnFile != null) {
             inputDataPersister.setAccountOnFile(accountOnFile);
         }
 
-        inputValidationPersister = new InputValidationPersister(paymentItem, accountOnFile);
+        inputValidationPersister = new InputValidationPersister(paymentProduct, accountOnFile);
 
         if (savedInstanceState != null) {
             initializeSavedInstanceStateData(savedInstanceState);
@@ -80,22 +88,23 @@ public class DetailInputActivity extends ShoppingCartActivity {
     private void loadIntentData() {
         Intent intent = getIntent();
         try {
-            session = SessionManager.getSession();
+            sdk = SdkManager.getSdk();
         } catch (IllegalStateException e) {
             throw new IllegalStateException(
-                "Session was not initialized. Be sure to call SessionManager.initSession() before launching this activity.");
+                "Sdk was not initialized. Be sure to call SdkManager.initSdk() before launching this activity.");
         }
 
-        paymentItem = (PaymentItem) intent.getSerializableExtra(Constants.INTENT_SELECTED_ITEM);
+        paymentProduct =
+            (PaymentProduct) intent.getSerializableExtra(Constants.INTENT_SELECTED_ITEM);
         accountOnFile =
             (AccountOnFile) intent.getSerializableExtra(Constants.INTENT_SELECTED_ACCOUNT_ON_FILE);
         paymentContext =
-            (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
+            (PaymentContextWithAmount) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
         shoppingCart = (ShoppingCart) intent.getSerializableExtra(Constants.INTENT_SHOPPINGCART);
 
-        if (session == null || paymentItem == null || paymentContext == null || shoppingCart == null) {
+        if (sdk == null || paymentProduct == null || paymentContext == null || shoppingCart == null) {
             throw new IllegalStateException(
-                "session, paymentItem, paymentContext and shoppingCart may not be null");
+                "sdk, paymentProduct, paymentContext and shoppingCart may not be null");
         }
     }
 
@@ -117,7 +126,8 @@ public class DetailInputActivity extends ShoppingCartActivity {
 
     protected void renderDynamicContent() {
         if (!rendered) {
-            fieldView.renderDynamicContent(inputDataPersister,
+            fieldView.renderDynamicContent(
+                inputDataPersister,
                 paymentContext,
                 inputValidationPersister
             );
@@ -127,7 +137,8 @@ public class DetailInputActivity extends ShoppingCartActivity {
             } else {
                 fieldView.deactivatePayButton();
             }
-            fieldView.setFocusAndCursorPosition(inputDataPersister.getFocusFieldId(),
+            fieldView.setFocusAndCursorPosition(
+                inputDataPersister.getFocusFieldId(),
                 inputDataPersister.getCursorPosition()
             );
             rendered = true;
@@ -137,7 +148,7 @@ public class DetailInputActivity extends ShoppingCartActivity {
     private void initializeRememberMeCheckBox() {
         // Show remember me checkbox when storing as account on file is allowed
         if (inputDataPersister.isPaymentProduct()) {
-            PaymentProduct paymentProduct = (PaymentProduct) inputDataPersister.getPaymentItem();
+            PaymentProduct paymentProduct = inputDataPersister.getPaymentProduct();
             if (Boolean.TRUE.equals(paymentProduct.getAllowsTokenization()) && // Tokenization allowed?
                 inputDataPersister.getAccountOnFile() == null) {            // AccountOnFile not already set?
 
@@ -161,15 +172,15 @@ public class DetailInputActivity extends ShoppingCartActivity {
 
             fieldView.showLoadDialog();
 
-            session.preparePaymentRequest(inputValidationPersister.getPaymentRequest(),
-                new PaymentRequestPreparedListener() {
+            sdk.encryptPaymentRequest(
+                inputValidationPersister.getPaymentRequest(), new PaymentRequestPreparedListener() {
                     @Override
-                    public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
-                        handlePreparedPaymentRequest(preparedPaymentRequest);
+                    public void onSuccess(EncryptedRequest encryptedRequest) {
+                        handlePreparedPaymentRequest(encryptedRequest);
                     }
 
                     @Override
-                    public void onFailure(EncryptDataException e) {
+                    public void onFailure(@NonNull SdkException e) {
                         handlePaymentRequestPreparationFailed();
                     }
                 }
@@ -185,8 +196,9 @@ public class DetailInputActivity extends ShoppingCartActivity {
     }
 
     protected void renderValidationMessages() {
-        fieldView.renderValidationMessages(inputValidationPersister,
-            inputDataPersister.getPaymentItem()
+        fieldView.renderValidationMessages(
+            inputValidationPersister,
+            inputDataPersister.getPaymentProduct()
         );
     }
 
@@ -202,7 +214,7 @@ public class DetailInputActivity extends ShoppingCartActivity {
     }
 
     @SuppressWarnings("unused")
-    public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
+    public void handlePreparedPaymentRequest(EncryptedRequest encryptedPaymentRequest) {
 
         // Hide progressDialog
         fieldView.hideLoadDialog();
@@ -237,7 +249,8 @@ public class DetailInputActivity extends ShoppingCartActivity {
         }
 
         outState.putSerializable(Constants.BUNDLE_INPUTDATAPERSISTER, inputDataPersister);
-        outState.putSerializable(Constants.BUNDLE_INPUTVALIDATIONPERSISTER,
+        outState.putSerializable(
+            Constants.BUNDLE_INPUTVALIDATIONPERSISTER,
             inputValidationPersister
         );
         outState.putBoolean(Constants.BUNDLE_RENDERED, rendered);
@@ -251,10 +264,12 @@ public class DetailInputActivity extends ShoppingCartActivity {
     }
 
     private void showTechnicalErrorDialog() {
-        DialogUtil.showAlertDialog(DetailInputActivity.this,
+        DialogUtil.showAlertDialog(
+            DetailInputActivity.this,
             R.string.errors_title,
             R.string.errors_technicalProblem,
             R.string.app_errors_general_button,
+            null,
             null
         );
     }

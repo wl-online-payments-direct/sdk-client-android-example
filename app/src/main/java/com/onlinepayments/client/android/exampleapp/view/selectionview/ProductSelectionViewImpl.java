@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view.selectionview;
 
 import android.app.Activity;
@@ -14,13 +24,12 @@ import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.dialog.DialogUtil;
 import com.onlinepayments.client.android.exampleapp.render.accountonfile.RenderAccountOnFile;
 import com.onlinepayments.client.android.exampleapp.render.product.RenderPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItems;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProducts;
 
 /**
  * View for the Payment Product Selection Activity
- * Copyright 2020 Global Collect Services B.V
  */
 public class ProductSelectionViewImpl implements ProductSelectionView {
 
@@ -51,28 +60,35 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     }
 
     @Override
-    public void renderDynamicContent(BasicPaymentItems paymentItems) {
+    public void renderDynamicContent(BasicPaymentProducts basicPaymentProducts) {
         // Render all basic paymentItems and accounts on file
-        for (BasicPaymentItem basicPaymentItem : paymentItems.getBasicPaymentItems()) {
-            paymentItemRenderer.renderPaymentItem(basicPaymentItem, renderProductsLayout);
+        for (BasicPaymentProduct product : basicPaymentProducts.getPaymentProducts()) {
+            paymentItemRenderer.renderPaymentItem(product, renderProductsLayout);
         }
 
         // Check if there are accountsOnFile, then set their container and header to visible
-        if (!paymentItems.getAccountsOnFile().isEmpty()) {
+        if (!basicPaymentProducts.getAccountsOnFile().isEmpty()) {
 
             rootView.findViewById(R.id.listAccountsOnFileHeader).setVisibility(View.VISIBLE);
             rootView.findViewById(R.id.listAccountsOnFile).setVisibility(View.VISIBLE);
             rootView.findViewById(R.id.listAccountsOnFileDivider).setVisibility(View.VISIBLE);
 
             // Render all accountsOnFile
-            for (AccountOnFile accountOnFile : paymentItems.getAccountsOnFile()) {
-                BasicPaymentItem correspondingPaymentItem =
-                    paymentItems.getBasicPaymentItemById(accountOnFile.getPaymentProductId());
-                accountOnFileRenderer.renderAccountOnFile(
-                    accountOnFile,
-                    correspondingPaymentItem,
-                    renderAccountOnFilesLayout
-                );
+            for (AccountOnFile accountOnFile : basicPaymentProducts.getAccountsOnFile()) {
+                BasicPaymentProduct correspondingPaymentItem = null;
+
+                for (BasicPaymentProduct product : basicPaymentProducts.getPaymentProducts()) {
+                    if (product.getId() != null && product.getId() == accountOnFile.getPaymentProductId()) {
+                        correspondingPaymentItem = product;
+                    }
+                }
+                if (correspondingPaymentItem != null) {
+                    accountOnFileRenderer.renderAccountOnFile(
+                        accountOnFile,
+                        correspondingPaymentItem,
+                        renderAccountOnFilesLayout
+                    );
+                }
             }
         }
     }
@@ -95,10 +111,12 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void showTechnicalErrorDialog(OnClickListener listener) {
         Context context = rootView.getContext();
-        alertDialog = DialogUtil.showAlertDialog(context,
+        alertDialog = DialogUtil.showAlertDialog(
+            context,
             R.string.errors_title,
             R.string.errors_technicalProblem,
             R.string.app_errors_general_button,
+            null,
             null
         );
     }
@@ -106,32 +124,14 @@ public class ProductSelectionViewImpl implements ProductSelectionView {
     @Override
     public void showNoInternetDialog(OnClickListener listener) {
         Context context = rootView.getContext();
-        alertDialog = DialogUtil.showAlertDialog(context,
+        alertDialog = DialogUtil.showAlertDialog(
+            context,
             R.string.app_errors_noInternetConnection_title,
             R.string.app_errors_noInternetConnection_bodytext,
             R.string.app_errors_general_button,
+            null,
             listener
         );
-    }
-
-    @Override
-    public void showSpendingLimitExceededErrorDialog(
-        OnClickListener positiveListener,
-        OnClickListener negativeListener
-    ) {
-        Context c = rootView.getContext();
-        String title = c.getString(R.string.app_errors_spendingLimitExceeded_title);
-        String msg = c.getString(R.string.app_errors_spendingLimitExceeded_bodyText);
-        String posButton =
-            c.getString(R.string.app_errors_spendingLimitExceeded_button_changeOrder);
-        String negButton =
-            c.getString(R.string.app_errors_spendingLimitExceeded_button_tryOtherMethod);
-        alertDialog = new AlertDialog.Builder(c).setTitle(title)
-            .setMessage(msg)
-            .setPositiveButton(posButton, positiveListener)
-            .setNegativeButton(negButton, negativeListener)
-            .create();
-        alertDialog.show();
     }
 
     @Override

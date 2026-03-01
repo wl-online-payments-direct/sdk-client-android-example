@@ -1,29 +1,38 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.iinlookup;
 
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 
-import com.onlinepayments.sdk.client.android.listener.IinLookupResponseListener;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.session.Session;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.facade.OnlinePaymentsSdk;
+import com.onlinepayments.sdk.client.android.facade.listeners.IinLookupResponseListener;
 
 import java.security.InvalidParameterException;
 
 /**
  * Android TextWatcher that is put on CreditCardNumber fields so an IIN lookup can be done
- * Copyright 2020 Global Collect Services B.V
  */
 public class IinLookupTextWatcher implements TextWatcher {
 
     // The Session which can retrieve the IIN details
-    private final Session session;
+    private final OnlinePaymentsSdk sdk;
 
     // The listener which will be called by the AsyncTask
     private final IinLookupResponseListener listener;
 
     // Payment context information that is sent with the IIN lookup
-    private final PaymentContext paymentContext;
+    private final PaymentContextWithAmount paymentContext;
 
     // Workaround for having twice called the afterTextChanged
     private String previousEnteredValue = "";
@@ -32,13 +41,13 @@ public class IinLookupTextWatcher implements TextWatcher {
      * Constructor
      *
      * @param context        Context of the application
-     * @param session        Session used for getting IinDetails synchronously
+     * @param sdk            Session used for getting IinDetails synchronously
      * @param paymentContext Payment context to be sent with the IIN lookup request
      */
     public IinLookupTextWatcher(
         Context context,
-        Session session,
-        PaymentContext paymentContext,
+        OnlinePaymentsSdk sdk,
+        PaymentContextWithAmount paymentContext,
         IinLookupResponseListener listener
     ) {
 
@@ -46,7 +55,7 @@ public class IinLookupTextWatcher implements TextWatcher {
             throw new InvalidParameterException(
                 "Error creating IinLookupTextWatcher, context may not be null");
         }
-        if (session == null) {
+        if (sdk == null) {
             throw new InvalidParameterException(
                 "Error creating IinLookupTextWatcher, session may not be null");
         }
@@ -59,7 +68,7 @@ public class IinLookupTextWatcher implements TextWatcher {
                 "Error creating IinLookupTextWatcher, c2sContext may not be null");
         }
 
-        this.session = session;
+        this.sdk = sdk;
         this.listener = listener;
         this.paymentContext = paymentContext;
     }
@@ -85,7 +94,7 @@ public class IinLookupTextWatcher implements TextWatcher {
         if (currentEnteredValue.length() >= 6 && isOneOfFirst8DigitsChanged(currentEnteredValue)) {
 
             // Do iinLookup
-            session.getIinDetails(currentEnteredValue, listener, paymentContext);
+            sdk.getIinDetails(currentEnteredValue, listener, paymentContext);
         }
 
         // Update the previousEnteredValue

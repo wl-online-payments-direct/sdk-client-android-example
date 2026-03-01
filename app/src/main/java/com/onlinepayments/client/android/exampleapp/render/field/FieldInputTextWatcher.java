@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.text.Editable;
@@ -5,13 +15,12 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.FormatResult;
+import com.onlinepayments.sdk.client.android.domain.FormatResult;
 
 import java.security.InvalidParameterException;
 
 /**
  * Android textWatcher that applies the masking to an inputField when necessary.
- * Copyright 2020 Global Collect Services B.V
  */
 public class FieldInputTextWatcher implements TextWatcher {
 
@@ -87,7 +96,6 @@ public class FieldInputTextWatcher implements TextWatcher {
 
             // Format the input if addMask == true
             if (addMask) {
-
                 applyMask(s.toString());
             }
 
@@ -99,7 +107,8 @@ public class FieldInputTextWatcher implements TextWatcher {
     protected void applyMask(String text) {
         // Mask the input
         int cursorIndex = editText.getSelectionStart();
-        FormatResult applyMaskResult = inputDataPersister.getMaskedValue(paymentProductFieldId,
+        FormatResult applyMaskResult = inputDataPersister.getMaskedValue(
+            paymentProductFieldId,
             text,
             oldValue,
             start,
