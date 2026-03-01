@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.model;
 
 import java.io.Serial;
@@ -8,7 +18,6 @@ import java.util.List;
 
 /**
  * This class contains shoppingCart items
- * Copyright 2020 Global Collect Services B.V
  */
 public class ShoppingCart implements Serializable {
 
@@ -18,7 +27,7 @@ public class ShoppingCart implements Serializable {
     /**
      * List with all ShoppingCartItems
      **/
-    private final List<ShoppingCartItem> shoppingCartItems = new ArrayList<ShoppingCartItem>();
+    private final List<ShoppingCartItem> shoppingCartItems = new ArrayList<>();
 
     /**
      * Add a shoppingCartItem to the shoppingCart

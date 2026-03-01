@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.product;
 
 import android.content.Context;
@@ -8,21 +18,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
 import com.squareup.picasso.Picasso;
 
 import java.security.InvalidParameterException;
 
 /**
  * Renders payment products
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderPaymentItem implements RenderPaymentItemInterface {
 
     @Override
-    public void renderPaymentItem(BasicPaymentItem product, ViewGroup parent) {
+    public void renderPaymentItem(BasicPaymentProduct product, ViewGroup parent) {
 
         if (product == null) {
             throw new InvalidParameterException(
@@ -50,23 +57,18 @@ public class RenderPaymentItem implements RenderPaymentItemInterface {
             paymentProductLayout.findViewById(R.id.paymentProductLogo);
 
         // Set payment item name & logo
-        if (product instanceof BasicPaymentProduct) {
-            if (!product.getDisplayHintsList().isEmpty()) {
-                DisplayHintsPaymentItem displayHints = product.getDisplayHintsList().get(0);
+        if (!Boolean.parseBoolean(product.getLogo())) {
 
-                paymentProductNameTextView.setText(displayHints.getLabel());
-                String logoUrl = displayHints.getLogoUrl();
-                if (logoUrl != null && !logoUrl.isEmpty()) {
-                    Picasso.get().load(logoUrl).into(paymentProductNameLogoImageView);
-                } else {
-                    paymentProductNameLogoImageView.setImageDrawable(null);
-                }
+            paymentProductNameTextView.setText(product.getLabel());
+            String logoUrl = product.getLogo();
+            if (logoUrl != null && !logoUrl.isEmpty()) {
+                Picasso.get().load(logoUrl).into(paymentProductNameLogoImageView);
             } else {
-                paymentProductNameTextView.setText(parent.getContext()
-                    .getString(R.string.errors_generalError));
+                paymentProductNameLogoImageView.setImageDrawable(null);
             }
         } else {
-            paymentProductNameTextView.setText(product.getId());
+            paymentProductNameTextView.setText(parent.getContext()
+                .getString(R.string.errors_generalError));
         }
 
         parent.addView(paymentProductLayout);

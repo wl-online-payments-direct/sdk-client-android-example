@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.dialog;
 
 import android.app.Dialog;
@@ -19,9 +29,7 @@ import com.onlinepayments.client.android.exampleapp.model.SessionDetails;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Dialog with the purpose of parsing session details from Json to Pojo
- * <p>
- * Copyright 2017 Global Collect Services B.V
+ * Dialog with the purpose of parsing session details from JSON to Pojo
  */
 public class ParseJsonDialog extends Dialog {
 
@@ -36,7 +44,9 @@ public class ParseJsonDialog extends Dialog {
      * @noinspection unused
      */
     public ParseJsonDialog(
-        @NonNull JsonParsedListener listener, @NonNull Context context, int themeResId
+        @NonNull JsonParsedListener listener,
+        @NonNull Context context,
+        int themeResId
     ) {
         super(context, themeResId);
         jsonParsedListener = listener;
@@ -122,8 +132,6 @@ public class ParseJsonDialog extends Dialog {
 
     /**
      * Listener class used to report back the parsed SessionDetails object
-     * <p>
-     * Copyright 2017 Global Collect Services B.V
      */
     public interface JsonParsedListener {
         void onJsonParsed(SessionDetails sessionDetails);

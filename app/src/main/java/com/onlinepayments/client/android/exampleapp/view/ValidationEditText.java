@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view;
 
 import android.content.Context;
@@ -18,7 +28,9 @@ public class ValidationEditText extends androidx.appcompat.widget.AppCompatEditT
     }
 
     public ValidationEditText(
-        Context context, AttributeSet attribute_set, int def_style_attribute
+        Context context,
+        AttributeSet attribute_set,
+        int def_style_attribute
     ) {
         super(context, attribute_set, def_style_attribute);
         createValidation();
@@ -45,7 +57,7 @@ public class ValidationEditText extends androidx.appcompat.widget.AppCompatEditT
     }
 
     private void validate() {
-        if (getText().toString().isEmpty()) {
+        if (Objects.requireNonNull(getText()).toString().isEmpty()) {
             setError("Value must be provided");
         } else {
             setError(null);

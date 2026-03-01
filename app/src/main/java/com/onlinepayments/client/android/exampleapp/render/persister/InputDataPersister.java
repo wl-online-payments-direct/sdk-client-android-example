@@ -1,10 +1,20 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.persister;
 
-import com.onlinepayments.sdk.client.android.model.FormatResult;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.FormatResult;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
+import com.onlinepayments.sdk.client.android.infrastructure.utils.StringFormatter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,10 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class that can be used to sture the input data of the user.
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
+ * Class that can be used to store the input data of the user.
  */
 public class InputDataPersister implements Serializable {
 
@@ -24,7 +31,7 @@ public class InputDataPersister implements Serializable {
     private static final long serialVersionUID = -2452386745689369702L;
 
     // The basicPaymentItem that belongs to the fields that are being persisted
-    private PaymentItem paymentItem;
+    private PaymentProduct paymentProduct;
 
     // The accountOnFile that is currently used to perform the payment
     private AccountOnFile accountOnFile;
@@ -42,16 +49,16 @@ public class InputDataPersister implements Serializable {
     // indicate that the cursor position has not been set.
     private int cursorPosition = -1;
 
-    public InputDataPersister(PaymentItem paymentItem) {
-        this.paymentItem = paymentItem;
+    public InputDataPersister(PaymentProduct paymentProduct) {
+        this.paymentProduct = paymentProduct;
     }
 
-    public void setPaymentItem(PaymentItem paymentItem) {
-        this.paymentItem = paymentItem;
+    public void setPaymentProduct(PaymentProduct paymentProduct) {
+        this.paymentProduct = paymentProduct;
     }
 
-    public PaymentItem getPaymentItem() {
-        return paymentItem;
+    public PaymentProduct getPaymentProduct() {
+        return paymentProduct;
     }
 
     public void setAccountOnFile(AccountOnFile accountOnFile) {
@@ -63,7 +70,7 @@ public class InputDataPersister implements Serializable {
     }
 
     public boolean isPaymentProduct() {
-        return paymentItem instanceof PaymentProduct;
+        return paymentProduct != null;
     }
 
     /**
@@ -111,9 +118,16 @@ public class InputDataPersister implements Serializable {
         }
 
         // Loop trough all fields and format the matching field value.
-        for (PaymentProductField field : paymentItem.getPaymentProductFields()) {
+        for (PaymentProductField field : paymentProduct.getFields()) {
             if (field.getId().equals(paymentProductFieldId)) {
-                return field.applyMask(newValue, oldValue, start, count, after);
+                return StringFormatter.applyMask(
+                    field.getDisplayHints().getMask(),
+                    newValue,
+                    oldValue,
+                    start,
+                    count,
+                    after
+                );
             }
         }
 
@@ -125,7 +139,7 @@ public class InputDataPersister implements Serializable {
      */
     public String getUnmaskedValue(String paymentProductFieldId) {
         if (paymentProductFieldId != null) {
-            for (PaymentProductField field : paymentItem.getPaymentProductFields()) {
+            for (PaymentProductField field : paymentProduct.getFields()) {
                 if (field.getId().equals(paymentProductFieldId)) {
                     return field.removeMask(getValue(paymentProductFieldId));
                 }

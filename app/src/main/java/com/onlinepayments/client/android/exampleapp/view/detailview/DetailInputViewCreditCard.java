@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view.detailview;
 
 import android.view.View;
@@ -5,16 +15,13 @@ import android.view.View;
 import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTextWatcher;
 import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
 
 import java.util.List;
 
 /**
  * Interface for the DetailInputView that has extra functionality for card payment products
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public interface DetailInputViewCreditCard extends DetailInputView {
     void initializeCreditCardField(
@@ -30,12 +37,13 @@ public interface DetailInputViewCreditCard extends DetailInputView {
 
     void removeCreditCardValidationMessage();
 
-    void renderPaymentProductLogoByIdInCreditCardField(PaymentItem paymentItem);
+    void renderPaymentProductLogoByIdInCreditCardField(PaymentProduct paymentProduct);
 
     void removeDrawableInEditText();
 
     void renderCoBrandNotification(
-        List<BasicPaymentItem> paymentProductsAllowedInContext, View.OnClickListener listener
+        List<BasicPaymentProduct> paymentProductsAllowedInContext,
+        View.OnClickListener listener
     );
 
     void removeCoBrandNotification();

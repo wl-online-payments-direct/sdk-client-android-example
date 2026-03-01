@@ -1,15 +1,22 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.accountonfile;
 
 import android.view.ViewGroup;
 
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
 
 /**
  * Defines the rendering of accounts on file interface
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public interface RenderAccountOnFileInterface {
 
@@ -18,10 +25,12 @@ public interface RenderAccountOnFileInterface {
      * This AccountOnFile is added to the given parent
      *
      * @param accountOnFile, AccountOnFile containing data for the account on file rendering
-     * @param paymentItem, the BasicPaymentItem belonging to the account on file
+     * @param basicPaymentProduct, the BasicPaymentproduct belonging to the account on file
      * @param parent, the ViewGroup to which the rendered account on file is added
      */
     void renderAccountOnFile(
-        AccountOnFile accountOnFile, BasicPaymentItem paymentItem, ViewGroup parent
+        AccountOnFile accountOnFile,
+        BasicPaymentProduct basicPaymentProduct,
+        ViewGroup parent
     );
 }

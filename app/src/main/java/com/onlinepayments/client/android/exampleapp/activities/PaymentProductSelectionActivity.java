@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.activities;
 
 import static com.onlinepayments.client.android.exampleapp.configuration.Constants.GOOGLE_PAY_TOKEN_FIELD_ID;
@@ -15,29 +25,26 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.PaymentData;
-import com.onlinepayments.client.android.exampleapp.BuildConfig;
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.configuration.CheckCommunication;
 import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.util.GooglePay;
-import com.onlinepayments.client.android.exampleapp.util.SessionManager;
+import com.onlinepayments.client.android.exampleapp.util.SdkManager;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionView;
 import com.onlinepayments.client.android.exampleapp.view.selectionview.ProductSelectionViewImpl;
-import com.onlinepayments.sdk.client.android.exception.EncryptDataException;
-import com.onlinepayments.sdk.client.android.listener.BasicPaymentItemsResponseListener;
-import com.onlinepayments.sdk.client.android.listener.PaymentProductResponseListener;
-import com.onlinepayments.sdk.client.android.listener.PaymentRequestPreparedListener;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.PaymentRequest;
-import com.onlinepayments.sdk.client.android.model.PreparedPaymentRequest;
-import com.onlinepayments.sdk.client.android.model.api.ErrorResponse;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFile;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItems;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentProduct;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
-import com.onlinepayments.sdk.client.android.session.Session;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFile;
+import com.onlinepayments.sdk.client.android.domain.exceptions.SdkException;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProducts;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentRequest.EncryptedRequest;
+import com.onlinepayments.sdk.client.android.domain.paymentRequest.PaymentRequest;
+import com.onlinepayments.sdk.client.android.facade.OnlinePaymentsSdk;
+import com.onlinepayments.sdk.client.android.facade.listeners.BasicPaymentProductsResponseListener;
+import com.onlinepayments.sdk.client.android.facade.listeners.PaymentProductResponseListener;
+import com.onlinepayments.sdk.client.android.facade.listeners.PaymentRequestPreparedListener;
 
 import org.json.JSONObject;
 
@@ -46,7 +53,6 @@ import java.util.Objects;
 
 /**
  * Activity that lists all the available payment options
- * Copyright 2020 Global Collect Services B.V
  */
 public class PaymentProductSelectionActivity extends ShoppingCartActivity implements
     DialogInterface.OnClickListener {
@@ -60,8 +66,8 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
     private ShoppingCart shoppingCart;
 
-    // The session object that is used to connect to the API
-    private Session session;
+    // The sdk object that is used to connect to the API
+    private OnlinePaymentsSdk sdk;
 
     // Parameters used to initialize the connection
     private String clientSessionId;
@@ -73,11 +79,11 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     private boolean environmentIsProduction;
 
     // Variables required to retrieve the payment items that are available for payment
-    private PaymentContext paymentContext;
+    private PaymentContextWithAmount paymentContext;
     private PaymentProduct paymentProduct;
 
     // Loaded payment product and selected Account On File information
-    private BasicPaymentItems paymentItems;
+    private BasicPaymentProducts basicPaymentProducts;
     private AccountOnFile accountOnFile;
 
     private final PaymentProductResponseListener paymentProductResponseListener =
@@ -85,16 +91,11 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             @Override
             public void onSuccess(@NonNull PaymentProduct paymentProduct) {
                 PaymentProductSelectionActivity.this.paymentProduct = paymentProduct;
-                handlePaymentItemCallBack(paymentProduct);
+                handlePaymentProductCallBack(paymentProduct);
             }
 
             @Override
-            public void onApiError(@NonNull ErrorResponse errorResponse) {
-                handleApiErrorOrException();
-            }
-
-            @Override
-            public void onException(@NonNull Throwable throwable) {
+            public void onFailure(@NonNull SdkException sdkException) {
                 handleApiErrorOrException();
             }
         };
@@ -120,10 +121,10 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             initializeSavedInstanceStateData(savedInstanceState);
         }
 
-        if (paymentItems == null) {
+        if (basicPaymentProducts == null) {
             try {
                 /*
-                 Instantiate the Session.
+                 Instantiate the Sdk.
                  This session has logging enabled, meaning that requests made to the server and
                  responses received from the server will be logged.
                  By default, logging is disabled.
@@ -133,49 +134,49 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                  To ensure that - for example - logging is enabled in debug and disabled in release,
                  you can use a build property whose value depends on the build variant of your app.
                  */
-                session = SessionManager.initSession(clientSessionId,
+                sdk = SdkManager.initSdk(
+                    clientSessionId,
                     customerId,
                     clientApiUrl,
                     assetUrl,
                     environmentIsProduction,
                     Constants.APPLICATION_IDENTIFIER,
-                    BuildConfig.LOGGING_ENABLED,
+                    //                    BuildConfig.LOGGING_ENABLED,
+                    false,
                     this
                 );
             } catch (InvalidParameterException e) {
-                Log.e(TAG, "Instantiating Session failed with: " + e.getMessage());
+                Log.e(TAG, "Instantiating Sdk failed with: " + e.getMessage());
                 selectionView.showTechnicalErrorDialog(this);
                 return;
             }
 
             selectionView.showLoadingIndicator();
 
-            session.getBasicPaymentItems(paymentContext, new BasicPaymentItemsResponseListener() {
-                @Override
-                public void onSuccess(@NonNull BasicPaymentItems basicPaymentItems) {
-                    if (!basicPaymentItems.getBasicPaymentItems().isEmpty()) {
+            sdk.getBasicPaymentProducts(
+                paymentContext, new BasicPaymentProductsResponseListener() {
+                    @Override
+                    public void onSuccess(BasicPaymentProducts basicPaymentProducts) {
+                        if (basicPaymentProducts != null) {
 
-                        paymentItems = basicPaymentItems;
+                            PaymentProductSelectionActivity.this.basicPaymentProducts =
+                                basicPaymentProducts;
 
-                        selectionView.renderDynamicContent(basicPaymentItems);
-                    } else {
-                        selectionView.showTechnicalErrorDialog(PaymentProductSelectionActivity.this);
+                            selectionView.renderDynamicContent(basicPaymentProducts);
+                        } else {
+                            selectionView.showTechnicalErrorDialog(PaymentProductSelectionActivity.this);
+                        }
+                        selectionView.hideLoadingIndicator();
                     }
-                    selectionView.hideLoadingIndicator();
-                }
 
-                @Override
-                public void onApiError(@NonNull ErrorResponse errorResponse) {
-                    handleApiErrorOrException();
+                    @Override
+                    public void onFailure(@NonNull SdkException e) {
+                        handleApiErrorOrException();
+                    }
                 }
-
-                @Override
-                public void onException(@NonNull Throwable throwable) {
-                    handleApiErrorOrException();
-                }
-            });
+            );
         } else {
-            selectionView.renderDynamicContent(paymentItems);
+            selectionView.renderDynamicContent(basicPaymentProducts);
         }
     }
 
@@ -195,13 +196,13 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         environmentIsProduction =
             intent.getBooleanExtra(Constants.MERCHANT_ENVIRONMENT_IS_PRODUCTION, false);
         paymentContext =
-            (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
+            (PaymentContextWithAmount) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
         shoppingCart = (ShoppingCart) intent.getSerializableExtra(Constants.INTENT_SHOPPINGCART);
     }
 
     private void initializeSavedInstanceStateData(Bundle savedInstanceState) {
-        paymentItems =
-            (BasicPaymentItems) savedInstanceState.getSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS);
+        basicPaymentProducts =
+            (BasicPaymentProducts) savedInstanceState.getSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS);
         shoppingCart =
             (ShoppingCart) savedInstanceState.getSerializable(Constants.BUNDLE_SHOPPING_CART);
     }
@@ -212,16 +213,17 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         if (v.getTag() instanceof BasicPaymentProduct) {
             // Reset accountOnFile to null, so its contents will not be filled in for a BasicPaymentProduct
             accountOnFile = null;
-            String paymentProductId = ((BasicPaymentProduct) v.getTag()).getId();
-            assert paymentProductId != null;
-            session.getPaymentProduct(paymentProductId,
+            String paymentProductId = String.valueOf(((BasicPaymentProduct) v.getTag()).getId());
+            sdk.getPaymentProduct(
+                Integer.parseInt(paymentProductId),
                 paymentContext,
                 paymentProductResponseListener
             );
         } else if (v.getTag() instanceof AccountOnFile) {
             // Store the Account on file so it can be added to the intent later on.
             accountOnFile = (AccountOnFile) v.getTag();
-            session.getPaymentProduct(accountOnFile.getPaymentProductId(),
+            sdk.getPaymentProduct(
+                accountOnFile.getPaymentProductId(),
                 paymentContext,
                 paymentProductResponseListener
             );
@@ -232,16 +234,16 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
     // Determine what view should be served next, based on whether the product has inputFields.
     // For some products special rules apply, which are also handled here.
-    private void handlePaymentItemCallBack(PaymentItem paymentItem) {
-        if (paymentItem == null) {
+    private void handlePaymentProductCallBack(PaymentProduct paymentProduct) {
+        if (paymentProduct == null) {
             selectionView.hideLoadingIndicator();
             selectionView.showTechnicalErrorDialog(this);
-        } else if (PAYMENTPRODUCTID_GOOGLEPAY.equals(paymentItem.getId())) {
+        } else if (paymentProduct.getId() != null && PAYMENTPRODUCTID_GOOGLEPAY == paymentProduct.getId()) {
             // Google pay requires a different flow even though it has fields. The fields should
             // not be shown to the user, but they will be filled after the user has completed the
             // Google pay flow.
-            startGooglePay((PaymentProduct) paymentItem);
-        } else if (paymentItem.getPaymentProductFields().isEmpty()) {
+            startGooglePay(paymentProduct);
+        } else if (paymentProduct.getFields().isEmpty()) {
             // For payment products that do not have fields configured other actions are required to
             // complete the payment. These actions may be a redirect to an external payment products'
             // website, or showing instructions to complete the payment.
@@ -250,7 +252,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
             startNextActivity(new Intent(this, PaymentResultActivity.class));
         } else {
             // Ask the user for its payment details in the next activity
-            determineAndStartDetailInputActivity(paymentItem);
+            determineAndStartDetailInputActivity(paymentProduct);
         }
     }
 
@@ -260,7 +262,8 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                 new GooglePay(this, paymentContext, paymentProduct, merchantId, merchantName);
             googlePay.start(environmentIsProduction);
         } else {
-            Toast.makeText(this,
+            Toast.makeText(
+                this,
                 "MerchantId & MerchantName cannot be empty when you want to use GooglePay",
                 Toast.LENGTH_LONG
             ).show();
@@ -268,26 +271,27 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
         selectionView.hideLoadingIndicator();
     }
 
-    private void determineAndStartDetailInputActivity(PaymentItem paymentItem) {
+    private void determineAndStartDetailInputActivity(PaymentProduct paymentProduct) {
         // Determine what DetailInputActivity to load. The base-class just renders the fields and
         // performs default validation on the fields. In some cases this is not enough however. In
         // these cases a subclass of the DetailInputActivity will be loaded that has additional
         // functionality for these specific products/methods.
         Intent detailInputActivityIntent;
-        if (Objects.equals(((PaymentProduct) paymentItem).getPaymentMethod(), "card")) {
+        if (Objects.equals(paymentProduct.getPaymentMethod(), "card")) {
             detailInputActivityIntent = new Intent(this, DetailInputActivityCreditCards.class);
         } else {
             detailInputActivityIntent = new Intent(this, DetailInputActivity.class);
         }
 
-        detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ITEM, paymentItem);
+        detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ITEM, paymentProduct);
         startNextActivity(detailInputActivityIntent);
     }
 
     private void startNextActivity(Intent detailInputActivityIntent) {
         // Add data to intent for the detail activity input
         detailInputActivityIntent.putExtra(Constants.INTENT_PAYMENT_CONTEXT, paymentContext);
-        detailInputActivityIntent.putExtra(Constants.INTENT_SELECTED_ACCOUNT_ON_FILE,
+        detailInputActivityIntent.putExtra(
+            Constants.INTENT_SELECTED_ACCOUNT_ON_FILE,
             accountOnFile
         );
         detailInputActivityIntent.putExtra(Constants.INTENT_SHOPPINGCART, shoppingCart);
@@ -324,20 +328,22 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                         String formattedGooglePayToken =
                             JSONObject.quote(unformattedGooglePayToken);
 
-                        PaymentRequest paymentRequest = new PaymentRequest(paymentProduct);
+                        PaymentRequest paymentRequest =
+                            new PaymentRequest(paymentProduct, null, false);
                         paymentRequest.setValue(GOOGLE_PAY_TOKEN_FIELD_ID, formattedGooglePayToken);
                         paymentRequest.validate();
 
-                        session.preparePaymentRequest(paymentRequest,
-                            new PaymentRequestPreparedListener() {
+                        sdk.encryptPaymentRequest(
+                            paymentRequest, new PaymentRequestPreparedListener() {
                                 @Override
-                                public void onPaymentRequestPrepared(PreparedPaymentRequest preparedPaymentRequest) {
-                                    handlePreparedPaymentRequest(preparedPaymentRequest);
+                                public void onSuccess(EncryptedRequest encryptedRequest) {
+                                    handlePreparedPaymentRequest(encryptedRequest);
                                 }
 
                                 @Override
-                                public void onFailure(EncryptDataException e) {
-                                    Log.e(TAG,
+                                public void onFailure(@NonNull SdkException e) {
+                                    Log.e(
+                                        TAG,
                                         "Could not prepare Payment Request due to exception: " + e.getMessage()
                                     );
                                     handleApiErrorOrException();
@@ -345,7 +351,8 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                             }
                         );
                     } catch (Exception e) {
-                        Log.e(TAG,
+                        Log.e(
+                            TAG,
                             "Could not parse malformed JSON: \"" + paymentDataJSONString + "\""
                         );
                     }
@@ -357,7 +364,8 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
                     break;
                 case AutoResolveHelper.RESULT_ERROR:
                     Status status = AutoResolveHelper.getStatusFromIntent(data);
-                    Log.e(TAG,
+                    Log.e(
+                        TAG,
                         "Something went wrong whilst making a Google Pay payment; errorCode: " + status
                     );
                     selectionView.hideLoadingIndicator();
@@ -374,7 +382,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
     /**
      * @noinspection unused
      */
-    public void handlePreparedPaymentRequest(PreparedPaymentRequest preparedPaymentRequest) {
+    public void handlePreparedPaymentRequest(EncryptedRequest encryptedRequest) {
         // Send the PreparedPaymentRequest to the merchant server, this contains a blob of encrypted values + base64encoded metadata
         //
         // Depending on the response from the merchant server, redirect to one of the following pages:
@@ -399,7 +407,7 @@ public class PaymentProductSelectionActivity extends ShoppingCartActivity implem
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS, paymentItems);
+        outState.putSerializable(Constants.BUNDLE_PAYMENT_PRODUCTS, basicPaymentProducts);
         outState.putSerializable(Constants.BUNDLE_SHOPPING_CART, shoppingCart);
 
         super.onSaveInstanceState(outState);

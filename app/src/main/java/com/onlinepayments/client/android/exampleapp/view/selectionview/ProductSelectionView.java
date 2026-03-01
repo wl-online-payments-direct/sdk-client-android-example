@@ -1,18 +1,26 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view.selectionview;
 
 import android.content.DialogInterface.OnClickListener;
 
 import com.onlinepayments.client.android.exampleapp.view.GeneralView;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItems;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProducts;
 
 /**
  * Interface for the Product selection view
- * <p>
- * Copyright 2020 Global Collect Services B.V
  */
 public interface ProductSelectionView extends GeneralView {
 
-    void renderDynamicContent(BasicPaymentItems paymentItems);
+    void renderDynamicContent(BasicPaymentProducts basicPaymentProducts);
 
     void showLoadingIndicator();
 
@@ -21,10 +29,6 @@ public interface ProductSelectionView extends GeneralView {
     void showTechnicalErrorDialog(OnClickListener listener);
 
     void showNoInternetDialog(OnClickListener listener);
-
-    void showSpendingLimitExceededErrorDialog(
-        OnClickListener positiveListener, OnClickListener negativeListener
-    );
 
     /**
      * @noinspection unused

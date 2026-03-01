@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.util;
 
 import java.text.NumberFormat;
@@ -6,9 +16,6 @@ import java.util.Locale;
 
 /**
  * Helper for getting the required amount in the correct currency
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public final class CurrencyUtil {
 

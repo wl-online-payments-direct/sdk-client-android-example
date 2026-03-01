@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.text.InputFilter;
@@ -10,16 +20,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.AccountOnFileAttribute;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.client.android.exampleapp.util.AttributeUtil;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.accountOnFile.AccountOnFileAttribute;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
 /**
  * Renders currency field
- * Copyright 2020 Global Collect Services B.V
  */
 public class RenderCurrency implements RenderInputFieldInterface {
 
@@ -28,7 +38,7 @@ public class RenderCurrency implements RenderInputFieldInterface {
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
 
         if (field == null) {
@@ -78,10 +88,9 @@ public class RenderCurrency implements RenderInputFieldInterface {
 
         // Set values from account on file
         if (inputDataPersister.getAccountOnFile() != null) {
-            for (AccountOnFileAttribute attribute : inputDataPersister.getAccountOnFile()
-                .getAttributes()) {
+            for (AccountOnFileAttribute attribute : AttributeUtil.getAttributes(inputDataPersister.getAccountOnFile())) {
                 if (attribute.getKey().equals(field.getId())) {
-                    if (!attribute.isEditingAllowed()) {
+                    if (!inputDataPersister.getAccountOnFile().isWritable(attribute.getKey())) {
                         integerPart.setEnabled(false);
                     }
                 }
@@ -90,7 +99,8 @@ public class RenderCurrency implements RenderInputFieldInterface {
 
         LinearLayout linearLayout = new LinearLayout(rowView.getContext());
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+        linearLayout.setLayoutParams(new LayoutParams(
+            LayoutParams.MATCH_PARENT,
             LayoutParams.WRAP_CONTENT
         ));
 
@@ -105,12 +115,14 @@ public class RenderCurrency implements RenderInputFieldInterface {
         decimalPart.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         decimalPart.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
 
-        integerPart.addTextChangedListener(new FieldInputTextWatcherCurrency(inputDataPersister,
+        integerPart.addTextChangedListener(new FieldInputTextWatcherCurrency(
+            inputDataPersister,
             field.getId(),
             decimalPart,
             true
         ));
-        decimalPart.addTextChangedListener(new FieldInputTextWatcherCurrency(inputDataPersister,
+        decimalPart.addTextChangedListener(new FieldInputTextWatcherCurrency(
+            inputDataPersister,
             field.getId(),
             integerPart,
             false

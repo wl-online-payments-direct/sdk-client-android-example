@@ -1,23 +1,29 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.onlinepayments.client.android.exampleapp.render.persister.InputDataPersister;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProductField;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.productField.PaymentProductField;
 
 import java.security.InvalidParameterException;
 
 /**
  * This class handles all rendering of the TextField field
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class RenderBoolean implements RenderInputFieldInterface {
 
@@ -26,7 +32,7 @@ public class RenderBoolean implements RenderInputFieldInterface {
         PaymentProductField field,
         InputDataPersister inputDataPersister,
         ViewGroup rowView,
-        PaymentContext paymentContext
+        PaymentContextWithAmount paymentContext
     ) {
 
         if (field == null) {
@@ -46,7 +52,8 @@ public class RenderBoolean implements RenderInputFieldInterface {
         CheckBox checkBox = new CheckBox(rowView.getContext());
         checkBox.setGravity(Gravity.CENTER_VERTICAL);
 
-        checkBox.setOnCheckedChangeListener(createOnCheckedChangedListener(inputDataPersister,
+        checkBox.setOnCheckedChangeListener(createOnCheckedChangedListener(
+            inputDataPersister,
             field.getId()
         ));
 
@@ -66,14 +73,12 @@ public class RenderBoolean implements RenderInputFieldInterface {
     }
 
     private OnCheckedChangeListener createOnCheckedChangedListener(
-        final InputDataPersister inputDataPersister, final String fieldId
+        final InputDataPersister inputDataPersister,
+        final String fieldId
     ) {
-        return new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                inputDataPersister.setValue(fieldId, Boolean.toString(b));
-                inputDataPersister.setFocusFieldId(fieldId);
-            }
+        return (compoundButton, b) -> {
+            inputDataPersister.setValue(fieldId, Boolean.toString(b));
+            inputDataPersister.setFocusFieldId(fieldId);
         };
     }
 }

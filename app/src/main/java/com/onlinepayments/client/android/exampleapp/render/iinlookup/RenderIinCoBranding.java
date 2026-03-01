@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.iinlookup;
 
 import android.content.Context;
@@ -15,17 +25,13 @@ import android.widget.TextView;
 
 import com.onlinepayments.client.android.exampleapp.R;
 import com.onlinepayments.client.android.exampleapp.translation.StringProvider;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.security.InvalidParameterException;
 import java.util.List;
 
-/**
- * Copyright 2020 Global Collect Services B.V
- */
 public class RenderIinCoBranding {
 
     // ErrorMessage layout dimensions
@@ -47,7 +53,7 @@ public class RenderIinCoBranding {
      */
     public void renderIinCoBrandNotification(
         final Context context,
-        final List<BasicPaymentItem> coBrands,
+        final List<BasicPaymentProduct> coBrands,
         final ViewGroup parentView,
         final String fieldId,
         final View.OnClickListener listener
@@ -84,10 +90,7 @@ public class RenderIinCoBranding {
         iinCoBrandNotificationView.setPaintFlags(iinCoBrandNotificationView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         iinCoBrandNotificationView.setGravity(Gravity.END);
         iinCoBrandNotificationView.setTag(VALIDATION_MESSAGE_TAG_PREFIX + fieldId);
-        iinCoBrandNotificationView.setTextAppearance(
-            rowView.getContext(),
-            R.style.IinCoBrandNotification
-        );
+        iinCoBrandNotificationView.setTextAppearance(R.style.IinCoBrandNotification);
 
         // Set an onclick listener for the notification text, so the coBrand tooltip can toggle
         iinCoBrandNotificationView.setOnClickListener(v -> {
@@ -103,10 +106,11 @@ public class RenderIinCoBranding {
             }
         });
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams layoutParams =
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
         layoutParams.setMargins(
             TOOLTIP_TEXT_MARGIN,
             TOOLTIP_TEXT_MARGIN,
@@ -137,7 +141,7 @@ public class RenderIinCoBranding {
     }
 
     private void addCoBrandToolTip(
-        List<BasicPaymentItem> paymentProductsAllowedInContext,
+        List<BasicPaymentProduct> paymentProductsAllowedInContext,
         ViewGroup rowView,
         String fieldId,
         View.OnClickListener listener,
@@ -174,18 +178,19 @@ public class RenderIinCoBranding {
         // Set the correct translation for the text in the textView
 
         // Render the paymentProducts the user can choose from in the tooltip box
-        for (BasicPaymentItem basicPaymentItem : paymentProductsAllowedInContext) {
+        for (BasicPaymentProduct basicPaymentProduct : paymentProductsAllowedInContext) {
             // Inflate the activity_select_payment_product_render layout
             LayoutInflater inflater = (LayoutInflater) coBrandTooltipLayout.getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View paymentProductLayout =
-                inflater.inflate(R.layout.activity_render_cobrand_payment_product,
+                inflater.inflate(
+                    R.layout.activity_render_cobrand_payment_product,
                     coBrandTooltipLayout,
                     false
                 );
 
             // Set a tag, so we can find it back after it has been clicked
-            paymentProductLayout.setTag(basicPaymentItem);
+            paymentProductLayout.setTag(basicPaymentProduct);
 
             // Get the TextView and ImageView which will be filled
             TextView paymentProductNameTextView =
@@ -194,14 +199,11 @@ public class RenderIinCoBranding {
                 paymentProductLayout.findViewById(R.id.coBrandPaymentProductLogo);
 
             // Set payment item name & logo
-            if (!basicPaymentItem.getDisplayHintsList().isEmpty()) {
-                DisplayHintsPaymentItem displayHints =
-                    basicPaymentItem.getDisplayHintsList().get(0);
-
-                paymentProductNameTextView.setText(displayHints.getLabel());
+            if (basicPaymentProduct != null) {
+                paymentProductNameTextView.setText(basicPaymentProduct.getLabel());
                 paymentProductLayout.setOnClickListener(listener);
 
-                Picasso.get().load(displayHints.getLogoUrl()).into(new Target() {
+                Picasso.get().load(basicPaymentProduct.getLogo()).into(new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                         Drawable drawable =

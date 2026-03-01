@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.activities;
 
 import android.os.Bundle;
@@ -14,13 +24,13 @@ import com.onlinepayments.client.android.exampleapp.render.iinlookup.IinLookupTe
 import com.onlinepayments.client.android.exampleapp.render.persister.IinDetailsPersister;
 import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCard;
 import com.onlinepayments.client.android.exampleapp.view.detailview.DetailInputViewCreditCardImpl;
-import com.onlinepayments.sdk.client.android.listener.IinLookupResponseListener;
-import com.onlinepayments.sdk.client.android.listener.PaymentProductResponseListener;
-import com.onlinepayments.sdk.client.android.model.api.ErrorResponse;
-import com.onlinepayments.sdk.client.android.model.iin.IinDetail;
-import com.onlinepayments.sdk.client.android.model.iin.IinDetailsResponse;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.BasicPaymentItem;
-import com.onlinepayments.sdk.client.android.model.paymentproduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.exceptions.SdkException;
+import com.onlinepayments.sdk.client.android.domain.iin.IinDetail;
+import com.onlinepayments.sdk.client.android.domain.iin.IinDetailsResponse;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.BasicPaymentProduct;
+import com.onlinepayments.sdk.client.android.domain.paymentProduct.PaymentProduct;
+import com.onlinepayments.sdk.client.android.facade.listeners.IinLookupResponseListener;
+import com.onlinepayments.sdk.client.android.facade.listeners.PaymentProductResponseListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Extension to DetailInputActivity that adds extra functionality for credit card payment products
- * Copyright 2020 Global Collect Services B.V
  */
 public class DetailInputActivityCreditCards extends DetailInputActivity implements
     View.OnClickListener {
@@ -43,7 +52,8 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
         super.onCreate(savedInstanceState);
         // setContentView will be called by super
 
-        fieldView = new DetailInputViewCreditCardImpl(this,
+        fieldView = new DetailInputViewCreditCardImpl(
+            this,
             R.id.detail_input_view_layout_fields_and_buttons
         );
 
@@ -67,34 +77,29 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
 
         boolean hasAccountOnFile = inputDataPersister.getAccountOnFile() != null;
 
-        IinLookupTextWatcher iinLookupTextWatcher = new IinLookupTextWatcher(this,
-            session,
-            paymentContext,
-            new IinLookupResponseListener() {
-                @Override
-                public void onSuccess(@NonNull IinDetailsResponse response) {
-                    handleIinDetailsResponse(response);
-                }
-
-                @Override
-                public void onApiError(@NonNull ErrorResponse errorResponse) {
-                    handleApiErrorOrException();
-                }
-
-                @Override
-                public void onException(@NonNull Throwable throwable) {
-                    handleApiErrorOrException();
-                }
+        IinLookupTextWatcher iinLookupTextWatcher = new IinLookupTextWatcher(
+            this, sdk, paymentContext, new IinLookupResponseListener() {
+            @Override
+            public void onSuccess(@NonNull IinDetailsResponse response) {
+                handleIinDetailsResponse(response);
             }
+
+            @Override
+            public void onFailure(@NonNull SdkException e) {
+                handleApiErrorOrException(e);
+            }
+        }
         );
-        fieldView.initializeCreditCardField(iinLookupTextWatcher,
+
+        fieldView.initializeCreditCardField(
+            iinLookupTextWatcher,
             inputDataPersister,
             iinDetailsPersister,
             hasAccountOnFile
         );
 
         if (inputDataPersister.isPaymentProduct()) {
-            fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem());
+            fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentProduct());
         }
 
         if (iinDetailsPersister.getIinDetailsResponse() != null) {
@@ -133,17 +138,20 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
         fieldView.activatePayButton();
 
         // Find whether the brand, chosen by the user on the payment product selection screen, is in the IinResponse
-        // and whether the chosen product can be payed with in the current paymentContext
+        // and whether the chosen product can be paid with in the current paymentContext
         List<IinDetail> coBrands = response.getCoBrands();
         if (coBrands != null) {
             for (IinDetail coBrand : coBrands) {
-                if (coBrand.isAllowedInContext() && Objects.equals(inputDataPersister.getPaymentItem()
-                    .getId(), coBrand.getPaymentProductId())) {
+                if (Boolean.TRUE.equals(coBrand.isAllowedInContext()) && Objects.equals(
+                    String.valueOf(
+                        inputDataPersister.getPaymentProduct().getId()),
+                    coBrand.getPaymentProductId()
+                )) {
 
                     // Show the corresponding logo for the Payment Product
-                    fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentItem());
+                    fieldView.renderPaymentProductLogoByIdInCreditCardField(inputDataPersister.getPaymentProduct());
 
-                    // Show the user that he can possibly switch to an other brand with the same card number
+                    // Show the user that he can possibly switch to another brand with the same card number
                     getCoBrandProductsAndRenderNotification(response);
                     return;
                 }
@@ -168,17 +176,19 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
             if (coBrands != null && !coBrands.isEmpty()) {
 
                 // Create a list to store all allowed paymentProducts
-                final List<BasicPaymentItem> paymentProductsAllowedInContext = new ArrayList<>(4);
+                final List<BasicPaymentProduct> paymentProductsAllowedInContext =
+                    new ArrayList<>(4);
 
                 // Counter
                 final AtomicInteger count = new AtomicInteger(coBrands.size());
                 // Add the allowed paymentProducts to the list
                 for (IinDetail iinDetail : coBrands) {
-                    if (iinDetail.isAllowedInContext()) {
+                    if (Boolean.TRUE.equals(iinDetail.isAllowedInContext())) {
 
                         // Load the paymentProducts that are allowed in context, so they can be rendered in the possible coBrand list
                         assert iinDetail.getPaymentProductId() != null;
-                        session.getPaymentProduct(iinDetail.getPaymentProductId(),
+                        sdk.getPaymentProduct(
+                            Integer.parseInt(iinDetail.getPaymentProductId()),
                             paymentContext,
                             new PaymentProductResponseListener() {
                                 @Override
@@ -194,13 +204,8 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
                                 }
 
                                 @Override
-                                public void onApiError(@NonNull ErrorResponse errorResponse) {
-                                    handleApiErrorOrException();
-                                }
-
-                                @Override
-                                public void onException(@NonNull Throwable throwable) {
-                                    handleApiErrorOrException();
+                                public void onFailure(@NonNull SdkException e) {
+                                    handleApiErrorOrException(e);
                                 }
                             }
                         );
@@ -224,18 +229,19 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
         fieldView.renderPaymentProductLogoByIdInCreditCardField(paymentProduct);
 
         // Update the request to use the new paymentProduct
-        inputDataPersister.setPaymentItem(paymentProduct);
+        inputDataPersister.setPaymentProduct(paymentProduct);
 
-        retrieveNewPaymentProduct(paymentProduct.getId());
+        retrieveNewPaymentProduct(String.valueOf(paymentProduct.getId()));
     }
 
     private void retrieveNewPaymentProduct(String paymentProductId) {
-        session.getPaymentProduct(paymentProductId,
+        sdk.getPaymentProduct(
+            Integer.parseInt(paymentProductId),
             paymentContext,
             new PaymentProductResponseListener() {
                 @Override
                 public void onSuccess(@NonNull PaymentProduct paymentProduct) {
-                    inputDataPersister.setPaymentItem(paymentProduct);
+                    inputDataPersister.setPaymentProduct(paymentProduct);
                     View v = fieldView.getViewWithFocus();
                     if (v instanceof EditText) {
                         inputDataPersister.setFocusFieldId((String) v.getTag());
@@ -251,13 +257,8 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
                 }
 
                 @Override
-                public void onApiError(@NonNull ErrorResponse errorResponse) {
-                    handleApiErrorOrException();
-                }
-
-                @Override
-                public void onException(@NonNull Throwable throwable) {
-                    handleApiErrorOrException();
+                public void onFailure(@NonNull SdkException e) {
+                    handleApiErrorOrException(e);
                 }
             }
         );
@@ -282,7 +283,7 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
         // If account on file is not null, check the entered payment product id with the aof product id
         if (inputDataPersister.getAccountOnFile() != null) {
             String accountOnFileProductId =
-                inputDataPersister.getAccountOnFile().getPaymentProductId();
+                String.valueOf(inputDataPersister.getAccountOnFile().getPaymentProductId());
             String iinDetailsResponseProductId = response.getPaymentProductId();
 
             // If entered card number product id does not equal aof product id, show an error message
@@ -311,11 +312,13 @@ public class DetailInputActivityCreditCards extends DetailInputActivity implemen
         }
     }
 
-    private void handleApiErrorOrException() {
-        DialogUtil.showAlertDialog(DetailInputActivityCreditCards.this,
+    private void handleApiErrorOrException(SdkException e) {
+        DialogUtil.showAlertDialog(
+            DetailInputActivityCreditCards.this,
             R.string.errors_title,
             R.string.errors_technicalProblem,
             R.string.app_errors_general_button,
+            e.getMessage(),
             null
         );
     }

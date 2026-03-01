@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.render.field;
 
 import android.text.Editable;
@@ -10,9 +20,6 @@ import java.security.InvalidParameterException;
 
 /**
  * Android textWatcher that fills the paymentProductField with this currencyField's value
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class FieldInputTextWatcherCurrency implements TextWatcher {
 

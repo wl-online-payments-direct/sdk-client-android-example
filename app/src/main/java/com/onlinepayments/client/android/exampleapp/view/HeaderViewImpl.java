@@ -1,3 +1,13 @@
+/*
+ * Do not remove or alter the notices in this preamble.
+ *
+ * Copyright © 2026 Worldline and/or its affiliates.
+ *
+ * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
+ *
+ * Please contact Worldline for questions regarding license and user rights.
+ */
+
 package com.onlinepayments.client.android.exampleapp.view;
 
 import android.app.Activity;
@@ -15,16 +25,13 @@ import com.onlinepayments.client.android.exampleapp.configuration.Constants;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCart;
 import com.onlinepayments.client.android.exampleapp.model.ShoppingCartItem;
 import com.onlinepayments.client.android.exampleapp.util.CurrencyUtil;
-import com.onlinepayments.sdk.client.android.model.PaymentContext;
+import com.onlinepayments.sdk.client.android.domain.PaymentContextWithAmount;
 
 import java.util.Locale;
 import java.util.Objects;
 
 /**
  * View for the Header that shows the merchant logo and shoppingCart
- * <p>
- * Copyright 2020 Global Collect Services B.V
- * </p>
  */
 public class HeaderViewImpl implements HeaderView {
 
@@ -41,8 +48,8 @@ public class HeaderViewImpl implements HeaderView {
 
         ShoppingCart shoppingCart =
             (ShoppingCart) intent.getSerializableExtra(Constants.INTENT_SHOPPINGCART);
-        PaymentContext paymentContext =
-            (PaymentContext) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
+        PaymentContextWithAmount paymentContext =
+            (PaymentContextWithAmount) intent.getSerializableExtra(Constants.INTENT_PAYMENT_CONTEXT);
 
         if (headerView == null) {
             throw new RuntimeException(
@@ -65,13 +72,17 @@ public class HeaderViewImpl implements HeaderView {
         }
     }
 
-    private void renderShoppingCart(ShoppingCart shoppingCart, PaymentContext paymentContext) {
+    private void renderShoppingCart(
+        ShoppingCart shoppingCart,
+        PaymentContextWithAmount paymentContext
+    ) {
 
         // Set the totalCost text on the header
         TextView totalCost = headerView.findViewById(R.id.totalCost);
         TextView totalCostDetail = headerView.findViewById(R.id.totalCostDetail);
 
-        String formattedTotalAmount = CurrencyUtil.formatAmount(shoppingCart.getTotalAmount(),
+        String formattedTotalAmount = CurrencyUtil.formatAmount(
+            shoppingCart.getTotalAmount(),
             paymentContext.getCountryCode(),
             Objects.requireNonNull(paymentContext.getAmountOfMoney()).getCurrencyCode()
         );
@@ -81,7 +92,7 @@ public class HeaderViewImpl implements HeaderView {
         renderOrderDetails(shoppingCart, paymentContext);
     }
 
-    private void renderOrderDetails(ShoppingCart cart, PaymentContext paymentContext) {
+    private void renderOrderDetails(ShoppingCart cart, PaymentContextWithAmount paymentContext) {
 
         Context context = headerView.getContext();
 
@@ -92,7 +103,8 @@ public class HeaderViewImpl implements HeaderView {
 
         // Set layout params
         LinearLayout.LayoutParams params =
-            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             );
         LinearLayout.LayoutParams descriptionParams =
@@ -111,24 +123,25 @@ public class HeaderViewImpl implements HeaderView {
             //Show the description
             TextView label = new TextView(context);
             label.setText(item.getDescription());
-            label.setTextAppearance(context, R.style.TotalCostLayoutSmallText);
+            label.setTextAppearance(R.style.TotalCostLayoutSmallText);
             label.setGravity(Gravity.START);
             layout.addView(label, descriptionParams);
 
             //Show the quantity
             TextView quantity = new TextView(context);
             quantity.setText(String.format(Locale.ROOT, "%d", item.getQuantity()));
-            quantity.setTextAppearance(context, R.style.TotalCostLayoutSmallText);
+            quantity.setTextAppearance(R.style.TotalCostLayoutSmallText);
             quantity.setGravity(Gravity.START);
             layout.addView(quantity, quantityParams);
 
             //Show the amount formatted
             TextView cost = new TextView(context);
-            cost.setText(CurrencyUtil.formatAmount(item.getAmountInCents(),
+            cost.setText(CurrencyUtil.formatAmount(
+                item.getAmountInCents(),
                 paymentContext.getCountryCode(),
                 Objects.requireNonNull(paymentContext.getAmountOfMoney()).getCurrencyCode()
             ));
-            cost.setTextAppearance(context, R.style.TotalCostLayoutSmallText);
+            cost.setTextAppearance(R.style.TotalCostLayoutSmallText);
             cost.setGravity(Gravity.END);
             layout.addView(cost, costParams);
 
