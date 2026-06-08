@@ -1,6 +1,8 @@
 /*
  * Do not remove or alter the notices in this preamble.
  *
+ * This software is owned by Worldline and may not be be altered, copied, reproduced, republished, uploaded, posted, transmitted or distributed in any way, without the prior written consent of Worldline.
+ *
  * Copyright © 2026 Worldline and/or its affiliates.
  *
  * All rights reserved. License grant and user rights and obligations according to the applicable license agreement.
@@ -15,7 +17,7 @@ public class Constants {
      * Application Identifier, used for identifying the application in network calls
      **/
     public static String APPLICATION_IDENTIFIER =
-        "OnlinePayments Android Java Example Application/v2.4.1";
+        "OnlinePayments Android Java Example Application/v2.4.2";
 
     /**
      * Intent data keys
