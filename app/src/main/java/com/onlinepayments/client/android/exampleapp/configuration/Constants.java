@@ -15,7 +15,7 @@ public class Constants {
      * Application Identifier, used for identifying the application in network calls
      **/
     public static String APPLICATION_IDENTIFIER =
-        "OnlinePayments Android Java Example Application/v2.4.0";
+        "OnlinePayments Android Java Example Application/v2.4.1";
 
     /**
      * Intent data keys
